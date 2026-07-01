@@ -254,6 +254,12 @@ body {
   flex-shrink: 0;
 }
 
+.emie-avatar img{
+  border: 2px solid black;
+  background: var(--cc-white);
+  border-radius: 20%;
+}
+
 .emie-avatar:hover {
   transform: scale(1.06) translateY(-2px);
 }
