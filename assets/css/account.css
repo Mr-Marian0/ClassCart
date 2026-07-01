@@ -1,0 +1,87 @@
+.account-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  min-height: 60vh;
+}
+
+.account-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.account-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.account-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.8rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  color: #94a3b8;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+
+.account-tab.active {
+  color: #0b1a33;
+  border-bottom-color: #0b1a33;
+}
+
+.account-form {
+  display: none;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.account-form.active {
+  display: flex;
+}
+
+.account-form h2 {
+  font-size: 1.4rem;
+  color: #0b1a33;
+}
+
+.account-btn {
+  background: #0b1a33;
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 60px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 0.5rem;
+}
+
+.account-btn:hover {
+  opacity: 0.85;
+}
+
+.account-switch {
+  text-align: center;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.account-switch a {
+  color: #256eff;
+  text-decoration: none;
+  font-weight: 600;
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cart Info</title>
+    <link rel="stylesheet" href="../assets/css/header.css" />
+    <link rel="stylesheet" href="../assets/css/footer.css" />
+    <link rel="stylesheet" href="../assets/css/account.css" />
+  </head>
+  <body>
+    <!---------------------- Header Placeholder ---------------------->
+    <div class="main-header" id="header-placeholder"></div>
+
+    <main class="account-page">
+      <div class="account-card">
+        <!-- Tabs -->
+        <div class="account-tabs">
+          <button class="account-tab active" data-tab="login">Login</button>
+          <button class="account-tab" data-tab="register">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <div class="account-form active" id="login-form">
+          <h2>Welcome Back!</h2>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="juan@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" placeholder="••••••••" />
+          </div>
+
+          <button class="account-btn" id="login-btn">Login</button>
+          <p class="account-switch">
+            No account? <a href="#" data-tab="register">Register here</a>
+          </p>
+        </div>
+
+        <!-- Register Form -->
+        <div class="account-form" id="register-form">
+          <h2>Create Account</h2>
+
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="reg-name" placeholder="Juan Dela Cruz" />
+          </div>
+
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="reg-email" placeholder="juan@email.com" />
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="reg-password" placeholder="••••••••" />
+          </div>
+
+          <button class="account-btn" id="register-btn">Register</button>
+          <p class="account-switch">
+            Already have an account? <a href="#" data-tab="login">Login here</a>
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <!------------------------- Footer Placeholder ------------------------->
+
+    <div class="footer" id="footer-placeholder"></div>
+
+    <script src="assets/js/header.js"></script>
+    <script src="assets/js/footer.js"></script>
+    <script src="assets/js/account.js"></script>
+  </body>
+</html>

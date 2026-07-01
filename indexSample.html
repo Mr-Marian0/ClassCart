@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Supply Hero</title>
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #f9fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .hero {
+      max-width: 1280px;
+      width: 100%;
+      background: white;
+      border-radius: 2.5rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* ---------- LEFT CONTENT ---------- */
+    .hero-content {
+      padding: 4rem 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      width: fit-content;
+      margin-bottom: 1.5rem;
+    }
+
+    .badge i {
+      margin-right: 0.5rem;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      color: #0b1a33;
+      margin-bottom: 1rem;
+    }
+
+    h1 .highlight {
+      background: linear-gradient(145deg, #fbbf24, #f59e0b);
+      padding: 0 0.2rem;
+      border-radius: 12px;
+      color: #0b1a33;
+    }
+
+    .subhead {
+      font-size: 1.15rem;
+      line-height: 1.6;
+      color: #475569;
+      max-width: 90%;
+      margin-bottom: 2rem;
+    }
+
+    .cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .btn-primary {
+      background: #0b1a33;
+      color: white;
+      border: none;
+      padding: 0.9rem 2.5rem;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      box-shadow: 0 8px 18px rgba(11, 26, 51, 0.2);
+    }
+
+    .btn-primary:hover {
+      background: #1e2f4a;
+      transform: translateY(-3px);
+      box-shadow: 0 14px 25px rgba(11, 26, 51, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 2px solid #d1d9e6;
+      padding: 0.85rem 2rem;
+      border-radius: 60px;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: #0b1a33;
+      background: #f8fafc;
+    }
+
+    .trust-row {
+      display: flex;
+      align-items: center;
+      gap: 1.8rem;
+      flex-wrap: wrap;
+      border-top: 1px solid #e9edf4;
+      padding-top: 1.8rem;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .trust-item i {
+      color: #f59e0b;
+      font-size: 1.1rem;
+    }
+
+    /* ---------- RIGHT IMAGE ---------- */
+    .hero-image {
+      background: #eef2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      min-height: 400px;
+    }
+
+    .hero-image img {
+      width: 100%;
+      height: auto;
+      max-height: 480px;
+      object-fit: contain;
+      border-radius: 1.5rem;
+      transition: 0.3s;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* Placeholder if no image is added yet */
+    .image-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      background: #d9e2f0;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #1e3a5f;
+      font-weight: 500;
+      text-align: center;
+      padding: 2rem;
+      border: 2px dashed #8ba0c7;
+    }
+
+    .image-placeholder i {
+      font-size: 4rem;
+      color: #4f6f9f;
+      margin-bottom: 1rem;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 920px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-content {
+        padding: 3rem 2rem;
+        order: 2;
+      }
+
+      .hero-image {
+        order: 1;
+        min-height: 250px;
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 2.6rem;
+      }
+
+      .subhead {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .cta-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .btn-primary, .btn-secondary {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<section class="hero">
+
+  <!-- LEFT: Text & CTA -->
+  <div class="hero-content">
+    <span class="badge">
+      <i class="fas fa-backpack"></i> Back-to-School Sale
+    </span>
+
+    <h1>
+      Gear Up for <br />
+      <span class="highlight">Greatness</span>
+    </h1>
+
+    <p class="subhead">
+      From notebooks to tech — discover premium, budget-friendly supplies that make learning easier and more fun.
+    </p>
+
+    <div class="cta-group">
+      <button class="btn-primary">
+        <i class="fas fa-cart-shopping"></i> Shop Now
+      </button>
+      <button class="btn-secondary">
+        <i class="fas fa-play"></i> See How
+      </button>
+    </div>
+
+    <div class="trust-row">
+      <span class="trust-item">
+        <i class="fas fa-truck-fast"></i> Free Shipping
+      </span>
+      <span class="trust-item">
+        <i class="fas fa-rotate-left"></i> 30-Day Returns
+      </span>
+      <span class="trust-item">
+        <i class="fas fa-star"></i> 4.9/5 Rating
+      </span>
+    </div>
+  </div>
+
+  <!-- RIGHT: Image (replace src with your own) -->
+  <div class="hero-image">
+    <!-- ✅ REPLACE the src below with your actual image -->
+    <img 
+      src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&auto=format&fit=crop" 
+      alt="School supplies arranged neatly with notebooks, pens, and a backpack" 
+    />
+    <!-- 
+      If you don't have an image yet, uncomment the placeholder below 
+      and comment out the <img> tag above.
+    -->
+    <!-- 
+    <div class="image-placeholder">
+      <i class="fas fa-image"></i>
+      <p>Your Image Here<br /><span style="font-size:0.8rem; opacity:0.7;">(replace src)</span></p>
+    </div>
+    -->
+  </div>
+
+</section>
+
+</body>
+</html>

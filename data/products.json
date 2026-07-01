@@ -1,0 +1,132 @@
+[
+  {
+    "id": 1,
+    "name": "Spiral Notebook",
+    "category": "Paper Products",
+    "price": 49.75,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/notebook.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 2,
+    "name": "Ballpen Set",
+    "category": "Writing Tools",
+    "price": 29.00,
+    "rating": 5,
+    "badge": "New Arrival",
+    "sampleImage": "assets/images/products/ballpen.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 3,
+    "name": "School Backpack",
+    "category": "Backpacks & Storage",
+    "price": 599.00,
+    "rating": 4,
+    "badge": "New Arrival",
+    "sampleImage": "assets/images/products/backpack.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 4,
+    "name": "Pencil Case",
+    "category": "Backpacks & Storage",
+    "price": 89.00,
+    "rating": 3,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/pencil-case.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 5,
+    "name": "Black Shoes",
+    "category": "Attire",
+    "price": 599.50,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/black-shoes.png",
+    "additionalImages": []
+  },
+  {
+    "id": 6,
+    "name": "Eraser Set",
+    "category": "Art & Creativity",
+    "price": 199.20,
+    "rating": 4.5,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/eraser-set.png",
+    "additionalImages": []
+  },
+  {
+    "id": 7,
+    "name": "Bond Paper Pack",
+    "category": "Paper Products",
+    "price": 250.00,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/bond-paper.png",
+    "additionalImages": []
+  },
+  {
+    "id": 8,
+    "name": "Highlighter Set",
+    "category": "Writing Tools",
+    "price": 150.00,
+    "rating": 4.5,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/highlighter-set.png",
+    "additionalImages": []
+  },
+  {
+    "id": 9,
+    "name": "Ruler Set",
+    "category": "Art & Creativity",
+    "price": 75.00,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/ruler-set.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 10,
+    "name": "Colored Pencils",
+    "category": "Writing Tools",
+    "price": 120.00,
+    "rating": 4.5,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/colored-pencils.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 11,
+    "name": "Sticky Notes",
+    "category": "Paper Products",
+    "price": 50.00,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/sticky-notes.jpg",
+    "additionalImages": []
+  },
+  {
+    "id": 12,
+    "name": "Scissors Set",
+    "category": "Art & Creativity",
+    "price": 80.00,
+    "rating": 4.5,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/scissors-set.png",
+    "additionalImages": []
+  },
+  {
+    "id": 13,
+    "name": "Glue Stick Set",
+    "category": "Art & Creativity",
+    "price": 60.00,
+    "rating": 4,
+    "badge": "Best Seller",
+    "sampleImage": "assets/images/products/glue-stick-set.jpg",
+    "additionalImages": []
+  }
+]
