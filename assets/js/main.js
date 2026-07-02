@@ -31,11 +31,18 @@ fetch("data/products.json")
 
 function renderTopSeller(product) {
   const card = document.getElementById("top-seller-card");
+  
   card.innerHTML = `
+    <!-- Best Seller Badge - Top Right Corner of the whole card -->
+    <img src="assets/images/best-seller.png" 
+         alt="Best Seller" 
+         class="best-seller-badge">
+
     <div class="top-seller-image">
       <img src="${product.sampleImage}" alt="${product.name}">
       <div class="top-seller-badge">🔥 Hot Pick</div>
     </div>
+    
     <div class="top-seller-details">
       <h2 class="top-seller-title">${product.name}</h2>
       <span class="top-seller-price">₱${product.price}</span>
@@ -43,12 +50,17 @@ function renderTopSeller(product) {
         <span>🎯 Customers are loving it:</span>
         <span class="top-seller-sold-badge">${product.soldCount.toLocaleString()}+ sold</span>
       </div>
-      <button class="top-seller-cta" data-product-id="${product.id}">Add to Cart</button>
+      
+      <div class="top-seller-cta-group">
+        <button class="top-seller-cta" data-product-id="${product.id}">Add to Cart</button>
+        <button class="top-seller-view-btn" data-product-id="${product.id}">View Product</button>
+      </div>
     </div>
   `;
 
-  // Top seller add to cart
-  card.querySelector(".top-seller-cta").addEventListener("click", () => {
+  // Add to Cart
+  const addBtn = card.querySelector(".top-seller-cta");
+  addBtn.addEventListener("click", () => {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
     const item = {
       id: product.id,
@@ -60,15 +72,11 @@ function renderTopSeller(product) {
     };
 
     const existing = cart.find((p) => p.id === item.id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push(item);
-    }
+    if (existing) existing.quantity += 1;
+    else cart.push(item);
 
     localStorage.setItem("cart", JSON.stringify(cart));
 
-    // Update cart count
     const cartCount = document.getElementById("cart-count");
     if (cartCount) {
       const total = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -76,7 +84,6 @@ function renderTopSeller(product) {
       cartCount.style.display = total === 0 ? "none" : "flex";
     }
 
-    // Emie reaction
     if (window.emieReact) {
       window.emieReact(
         "assets/gifs/kilig_emie.gif",
@@ -85,15 +92,13 @@ function renderTopSeller(product) {
       );
     }
 
-    // Button feedback
-    const btn = event.target;
-    const originalText = btn.textContent;
-    btn.textContent = "✓ Added!";
-    btn.style.background = "var(--cc-leaf)";
+    const originalText = addBtn.textContent;
+    addBtn.textContent = "✓ Added!";
+    addBtn.style.background = "var(--cc-leaf)";
     
     setTimeout(() => {
-      btn.textContent = originalText;
-      btn.style.background = "var(--cc-yellow)";
+      addBtn.textContent = originalText;
+      addBtn.style.background = "var(--cc-yellow)";
     }, 2000);
   });
 }
@@ -122,8 +127,8 @@ function renderFeatured(products, category) {
 
       card.style.cursor = "pointer";
       card.addEventListener("click", () => {
-        window.location.href = `product.html?id=${product.id}`;
-      });
+    window.location.href = `product.html?id=${product.id}`;
+  });
     });
 
     grid.classList.remove("flip");

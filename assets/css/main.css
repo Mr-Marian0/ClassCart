@@ -474,3 +474,59 @@ html, body {
     width: 100%;
   }
 }
+
+/* ─────────────────────────────────────────
+   TOP SELLER BEST-SELLER BADGE (Card Level)
+───────────────────────────────────────── */
+
+.top-seller-card {
+  position: relative;
+}
+
+.best-seller-badge {
+  position: absolute;
+  top: -25px;
+  right: 30px;
+  width: 155px;
+  z-index: 999;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.25));
+  transition: transform 0.3s ease;
+}
+
+.top-seller-card:hover .best-seller-badge {
+  transform: scale(1.08) rotate(6deg);
+}
+
+/* View Product button */
+.top-seller-cta-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.top-seller-view-btn {
+  background: var(--cc-ink);
+  color: var(--cc-white);
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: var(--cc-radius);
+  font-weight: 700;
+  font-size: 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.top-seller-view-btn:hover {
+  background: #1f2937;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .best-seller-badge {
+    width: 130px;
+    top: -20px;
+    right: 20px;
+  }
+}
