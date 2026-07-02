@@ -54,6 +54,39 @@ body {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.2s;
+}
+
+.header-logo:hover {
+  opacity: 0.85;
+}
+
+.logo-emie-container {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-emie {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: rotate(-15deg);
+  filter: drop-shadow(0 2px 4px rgba(255, 217, 61, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.header-logo:hover .logo-emie {
+  transform: rotate(-15deg) scale(1.08);
+}
+
+.logo-text {
+  display: flex;
+  align-items: center;
   gap: 2px;
 }
 
@@ -252,12 +285,6 @@ body {
   pointer-events: all;
   transition: transform 0.2s ease;
   flex-shrink: 0;
-}
-
-.emie-avatar img{
-  border: 2px solid black;
-  background: var(--cc-white);
-  border-radius: 20%;
 }
 
 .emie-avatar:hover {

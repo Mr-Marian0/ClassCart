@@ -147,3 +147,27 @@ fetch("components/header.html")
       }
     });
   });
+
+// Welcome greeting function
+window.showEmieWelcome = function() {
+  if (sessionStorage.getItem("emieWelcomed")) return;
+  
+  const emieAvatar = document.getElementById("emie-logo");
+  const emieImg = document.getElementById("emie-img");
+  const emieBubble = document.getElementById("emie-bubble");
+  
+  if (!emieAvatar || !emieImg || !emieBubble) return;
+  
+  sessionStorage.setItem("emieWelcomed", "true");
+  
+  emieImg.src = "assets/gifs/kilig_emie.gif";
+  emieBubble.textContent = "Hi! I'm Emie, your shopping buddy! 👋";
+  emieBubble.classList.add("show");
+  
+  setTimeout(() => {
+    emieBubble.classList.remove("show");
+    setTimeout(() => {
+      emieImg.src = "assets/gifs/idle_emie2.gif";
+    }, 250);
+  }, 3000);
+};
