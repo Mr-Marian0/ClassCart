@@ -4,6 +4,17 @@ function getCart() {
 
 function saveCart(cart) {
   localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartCount();
+}
+
+function updateCartCount() {
+  const cart = getCart();
+  const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = document.getElementById("cart-count");
+  if (cartCount) {
+    cartCount.textContent = total;
+    cartCount.style.display = total === 0 ? "none" : "flex";
+  }
 }
 
 function renderCart() {
@@ -12,11 +23,14 @@ function renderCart() {
   container.innerHTML = '';
 
   if (cart.length === 0) {
-    container.innerHTML = '<p class="cart-empty">Your cart is empty.</p>';
+    container.innerHTML = '<p class="cart-empty">Your cart is empty. Start shopping!</p>';
     document.getElementById('cart-subtotal').textContent = '₱0.00';
     document.getElementById('cart-total').textContent = '₱0.00';
+    document.getElementById('checkout-btn').disabled = true;
     return;
   }
+
+  document.getElementById('checkout-btn').disabled = false;
 
   let subtotal = 0;
 
@@ -33,11 +47,13 @@ function renderCart() {
         <span class="cart-item-price">₱${item.price}</span>
       </div>
       <div class="cart-item-controls">
-        <button class="qty-btn" data-index="${index}" data-action="decrease">-</button>
-        <span>${item.quantity}</span>
-        <button class="qty-btn" data-index="${index}" data-action="increase">+</button>
+        <div class="qty-group">
+          <button class="qty-btn qty-decrease" data-index="${index}">−</button>
+          <span class="qty-display">${item.quantity}</span>
+          <button class="qty-btn qty-increase" data-index="${index}">+</button>
+        </div>
+        <button class="remove-btn" data-index="${index}">Remove</button>
       </div>
-      <button class="remove-btn" data-index="${index}">Remove</button>
     `;
     container.appendChild(row);
   });
@@ -49,37 +65,71 @@ function renderCart() {
 document.addEventListener('click', (e) => {
   const cart = getCart();
 
-  if (e.target.classList.contains('qty-btn')) {
-    const index = e.target.dataset.index;
-    const action = e.target.dataset.action;
+  if (e.target.classList.contains('qty-increase')) {
+    const index = parseInt(e.target.dataset.index);
+    cart[index].quantity += 1;
+    
+    if (window.emieReact) {
+      window.emieReact(
+        "assets/gifs/kilig_emie.gif",
+        `More ${cart[index].name}? I like it!`,
+        2000
+      );
+    }
+    
+    saveCart(cart);
+    renderCart();
+  }
 
-    if (action === 'increase') {
-      cart[index].quantity += 1;
-    } else if (action === 'decrease') {
-      if (cart[index].quantity > 1) {
-        cart[index].quantity -= 1;
-      } else {
-        cart.splice(index, 1);
+  if (e.target.classList.contains('qty-decrease')) {
+    const index = parseInt(e.target.dataset.index);
+    
+    if (cart[index].quantity > 1) {
+      cart[index].quantity -= 1;
+      
+      if (window.emieReact) {
+        window.emieReact(
+          "assets/gifs/trans_emie.gif",
+          `Okay, less it is...`,
+          1800
+        );
+      }
+    } else {
+      cart.splice(index, 1);
+      
+      if (window.emieReact) {
+        window.emieReact(
+          "assets/gifs/jelous_emie.gif",
+          `You're removing it? 😢`,
+          2000
+        );
       }
     }
-
+    
     saveCart(cart);
     renderCart();
   }
 
   if (e.target.classList.contains('remove-btn')) {
-    const index = e.target.dataset.index;
+    const index = parseInt(e.target.dataset.index);
+    const itemName = cart[index].name;
     cart.splice(index, 1);
+    
+    if (window.emieReact) {
+      window.emieReact(
+        "assets/gifs/angry_emie.gif",
+        `You removed ${itemName}!`,
+        2200
+      );
+    }
+    
     saveCart(cart);
     renderCart();
   }
 });
 
-renderCart();
-
-// ---------------------------------- Check out event ---------------------------------------------
-
-document.querySelector('.checkout-btn').addEventListener('click', () => {
+// Checkout button
+document.getElementById('checkout-btn').addEventListener('click', () => {
   const user = localStorage.getItem('loggedInUser');
   if (!user) {
     localStorage.setItem('redirectAfterLogin', 'checkout.html');
@@ -88,3 +138,6 @@ document.querySelector('.checkout-btn').addEventListener('click', () => {
   }
   window.location.href = 'checkout.html';
 });
+
+// Initial render
+renderCart();

@@ -1,51 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+/* ── CSS TOKENS ── */
+:root {
+  --cc-yellow:  #FFD93D;
+  --cc-ink:     #111827;
+  --cc-paper:   #F5F7FA;
+  --cc-leaf:    #22C55E;
+  --cc-slate:   #6B7280;
+  --cc-white:   #FFFFFF;
+  --cc-border:  #E5E7EB;
+  --cc-radius:  8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--cc-white);
+  color: var(--cc-ink);
+}
+
+/* ─────────────────────────────────────────
+   ACCOUNT PAGE
+───────────────────────────────────────── */
+
 .account-page {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 4rem 2rem;
-  min-height: 60vh;
+  min-height: calc(100vh - 200px);
 }
 
 .account-card {
-  background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
-  padding: 2.5rem;
+  background: var(--cc-white);
+  border-radius: 12px;
+  border: 1px solid var(--cc-border);
+  padding: 3rem;
   width: 100%;
-  max-width: 420px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  max-width: 440px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
+
+/* ─────────────────────────────────────────
+   TABS
+───────────────────────────────────────── */
 
 .account-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 2rem;
-  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 2.5rem;
+  border-bottom: 2px solid var(--cc-border);
 }
 
 .account-tab {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 0.8rem;
+  padding: 1rem 0.5rem;
   font-weight: 600;
   font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
-  color: #94a3b8;
+  color: var(--cc-slate);
   border-bottom: 2px solid transparent;
   margin-bottom: -2px;
   transition: all 0.2s;
+  text-align: center;
+}
+
+.account-tab:hover {
+  color: var(--cc-ink);
 }
 
 .account-tab.active {
-  color: #0b1a33;
-  border-bottom-color: #0b1a33;
+  color: var(--cc-ink);
+  border-bottom-color: var(--cc-yellow);
+  font-weight: 700;
 }
+
+/* ─────────────────────────────────────────
+   FORMS
+───────────────────────────────────────── */
 
 .account-form {
   display: none;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 1.5rem;
 }
 
 .account-form.active {
@@ -53,35 +96,107 @@
 }
 
 .account-form h2 {
-  font-size: 1.4rem;
-  color: #0b1a33;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cc-ink);
+  margin: 0;
+  letter-spacing: -0.01em;
 }
 
-.account-btn {
-  background: #0b1a33;
-  color: white;
-  border: none;
-  padding: 0.9rem;
-  border-radius: 60px;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
   font-weight: 600;
+  color: var(--cc-ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.form-group input {
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--cc-ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder {
+  color: var(--cc-slate);
+}
+
+.form-group input:focus {
+  border-color: var(--cc-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 217, 61, 0.18);
+}
+
+/* ─────────────────────────────────────────
+   BUTTONS
+───────────────────────────────────────── */
+
+.account-btn {
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  border: none;
+  padding: 1rem;
+  border-radius: var(--cc-radius);
+  font-weight: 700;
   font-size: 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   cursor: pointer;
-  transition: opacity 0.2s;
   margin-top: 0.5rem;
+  transition: background 0.2s, transform 0.2s;
 }
 
 .account-btn:hover {
-  opacity: 0.85;
+  background: #f5cc28;
+  transform: translateY(-2px);
 }
+
+.account-btn:active {
+  transform: translateY(0);
+}
+
+/* ─────────────────────────────────────────
+   SWITCH TEXT
+───────────────────────────────────────── */
 
 .account-switch {
   text-align: center;
-  font-size: 0.88rem;
-  color: #64748b;
+  font-size: 0.9rem;
+  color: var(--cc-slate);
+  margin: 0;
 }
 
 .account-switch a {
-  color: #256eff;
+  color: var(--cc-yellow);
   text-decoration: none;
   font-weight: 600;
+  transition: color 0.2s;
+}
+
+.account-switch a:hover {
+  color: #f5cc28;
+  text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .account-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .account-form h2 {
+    font-size: 1.3rem;
+  }
 }

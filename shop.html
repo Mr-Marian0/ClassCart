@@ -3,66 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Listing</title>
-    <link rel="stylesheet" href="../assets/css/header.css">
-    <link rel="stylesheet" href="../assets/css/footer.css">
-    <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/shop.css">
+    <title>Shop - ClassCart</title>
+    <link rel="stylesheet" href="assets/css/header.css">
+    <link rel="stylesheet" href="assets/css/footer.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/shop.css">
 </head>
 <body>
     <!---------------------- Header Placeholder ---------------------->
-    <div class="main-header" id="header-placeholder">
-      
-    </div>
+    <div class="main-header" id="header-placeholder"></div>
 
     <main class="main-listing">
     
         <div class="main-listing-sidebar">
 
+            <!-- Sidebar Filters -->
             <aside class="listing-sidebar">
 
+                <!-- Categories -->
                 <div class="listing-sidebar-box1">
                     <h2>Categories</h2>
+                    <ul id="category-list">
+                        <li><a href="#" data-category="all" class="active">All Products</a></li>
+                        <li><a href="#" data-category="Writing Tools">Writing Tools</a></li>
+                        <li><a href="#" data-category="Paper Products">Paper Products</a></li>
+                        <li><a href="#" data-category="Art & Creativity">Art & Creativity</a></li>
+                        <li><a href="#" data-category="Backpacks & Storage">Backpacks & Storage</a></li>
+                    </ul>
                 </div>
 
-                <div class="listing-sidebar-box2">
-                    <ul>
-                        <li><a href="#">BEST SELLER</a></li>
-                        <li><a href="#">NEW ARRIVALS</a></li>
-                        <li><a href="#">PRICE RANGE</a></li>
-                    </ul>
+                <!-- Price Range Filter -->
+                <div class="price-filter">
+                    <h3>Price Range</h3>
+                    <div class="price-inputs">
+                        <input type="number" id="price-min" placeholder="Min" min="0" value="0">
+                        <input type="number" id="price-max" placeholder="Max" min="0" value="1000">
+                    </div>
                 </div>
                 
             </aside>
-            
-            <!--Listing 1-->
-        
-            <div class="main-listing-wrapper">
-                <div id="product-grid">
 
+            <!-- Main Content -->
+            <div class="main-listing-wrapper">
+                
+                <!-- Top Bar: Count + Sort -->
+                <div class="listing-top-bar">
+                    <span class="listing-product-count">
+                        Showing <span id="product-count">0</span> products
+                    </span>
+                    <div class="listing-sort">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select">
+                            <option value="newest">Newest</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="name">Name: A to Z</option>
+                        </select>
+                    </div>
                 </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid"></div>
             </div>
         </div>
 
-        
-
+        <!-- Pagination -->
         <div class="main-listing-pagination-wrapper">
-            <button class="move-page-left"> < </button>
-            <span class="listing-pagination-number"> 1 / 5 </span>
-            <button class="move-page-right"> > </button>
+            <button class="move-page-left">&lt;</button>
+            <span class="listing-pagination-number"><span id="current-page">1</span> / <span id="total-pages">5</span></span>
+            <button class="move-page-right">&gt;</button>
         </div>
 
     </main>
 
-    <!------------------------- Footer Placeholder ------------------------->
-
-    <div class="footer" id="footer-placeholder">
-      
-    </div>
+    <!------------------------- Footer Placeholder --------------------------->
+    <div class="footer" id="footer-placeholder"></div>
 
     <script src="assets/js/header.js"></script>
     <script src="assets/js/footer.js"></script>
     <script src="assets/js/shop.js"></script>
-    <script src="../assets/js/product.js"></script>
 </body>
 </html>
