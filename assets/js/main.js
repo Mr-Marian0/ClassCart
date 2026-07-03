@@ -40,14 +40,14 @@ function renderTopSeller(product) {
 
     <div class="top-seller-image">
       <img src="${product.sampleImage}" alt="${product.name}">
-      <div class="top-seller-badge">🔥 Hot Pick</div>
+      <div class="top-seller-badge">Hot Pick of the Month!</div>
     </div>
     
     <div class="top-seller-details">
       <h2 class="top-seller-title">${product.name}</h2>
       <span class="top-seller-price">₱${product.price}</span>
       <div class="top-seller-sold">
-        <span>🎯 Customers are loving it:</span>
+        <span>Customers are loving it:</span>
         <span class="top-seller-sold-badge">${product.soldCount.toLocaleString()}+ sold</span>
       </div>
       
@@ -101,6 +101,12 @@ function renderTopSeller(product) {
       addBtn.style.background = "var(--cc-yellow)";
     }, 2000);
   });
+
+  const viewBtn = card.querySelector(".top-seller-view-btn");
+  viewBtn.addEventListener("click", () => {
+    window.location.href = `product.html?id=${product.id}`;
+  });
+
 }
 
 function renderFeatured(products, category) {
