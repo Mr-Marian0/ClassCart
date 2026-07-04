@@ -358,6 +358,13 @@ body {
    RESPONSIVE DESIGN
 ───────────────────────────────────────── */
 
+@media (max-width: 1024px) {
+  .checkout-page {
+    grid-template-columns: 1fr 300px;
+    gap: 1.75rem;
+  }
+}
+
 @media (max-width: 768px) {
   .checkout-page {
     grid-template-columns: 1fr;
@@ -381,5 +388,37 @@ body {
 
   .order-modal-box h2 {
     font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .checkout-page {
+    padding: 1rem;
+  }
+
+  .checkout-form h2 {
+    font-size: 1.2rem;
+  }
+
+  .payment-section {
+    padding: 1rem;
+  }
+
+  .payment-option {
+    padding: 0.8rem;
+    font-size: 0.88rem;
+  }
+
+  .order-modal-box {
+    padding: 1.5rem;
+  }
+
+  .order-status {
+    gap: 0.5rem;
+  }
+
+  .status-step {
+    padding: 0.4rem 0.9rem;
+    font-size: 0.78rem;
   }
 }

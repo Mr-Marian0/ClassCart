@@ -348,3 +348,161 @@ body {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — TABLET (≤1024px)
+───────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .header-inner {
+    padding: 0 1.5rem;
+    gap: 1rem;
+  }
+
+  .header-nav {
+    gap: 0;
+  }
+
+  .header-nav a {
+    padding: 0.45rem 0.7rem;
+    font-size: 0.85rem;
+  }
+
+  .header-search.open {
+    width: 220px;
+  }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — MOBILE (≤768px)
+───────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .header-inner {
+    position: relative;
+    padding: 0 1rem;
+    height: 60px;
+    gap: 0.6rem;
+  }
+
+  .logo-emie-container {
+    width: 38px;
+    height: 38px;
+  }
+
+  .header-logo {
+    font-size: 1.15rem;
+    gap: 0.3rem;
+  }
+
+  .header-nav a {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.8rem;
+  }
+
+  .header-icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  /* Search becomes a full-width dropdown instead of squeezing the row */
+  .header-search {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    width: auto;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    background: var(--cc-white);
+    border-bottom: 1px solid var(--cc-border);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    transition: height 0.3s ease, opacity 0.25s ease;
+  }
+
+  .header-search.open {
+    width: auto;
+    height: 60px;
+    opacity: 1;
+  }
+
+  .header-search .search-inner {
+    margin: 0 1rem;
+    height: 44px;
+  }
+
+  /* Emie companion shrinks and tucks closer to the corner */
+  .emie-companion {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .emie-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .emie-bubble {
+    max-width: 150px;
+    font-size: 0.72rem;
+    padding: 0.4rem 0.7rem;
+  }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — SMALL MOBILE (≤480px)
+───────────────────────────────────────── */
+
+@media (max-width: 480px) {
+  .header-inner {
+    padding: 0 0.75rem;
+    gap: 0.4rem;
+  }
+
+  .logo-emie-container {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header-logo {
+    font-size: 1rem;
+  }
+
+  .header-nav a {
+    padding: 0.35rem 0.4rem;
+    font-size: 0.72rem;
+  }
+
+  .header-actions {
+    gap: 0.25rem;
+  }
+
+  .header-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .cart-count {
+    top: -5px;
+    right: -5px;
+    font-size: 0.6rem;
+    min-width: 16px;
+    height: 16px;
+  }
+
+  .emie-avatar {
+    width: 50px;
+    height: 50px;
+  }
+
+  .emie-companion {
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .emie-bubble {
+    max-width: 120px;
+    font-size: 0.68rem;
+  }
+}

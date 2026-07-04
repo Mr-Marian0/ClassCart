@@ -344,7 +344,23 @@
    RESPONSIVE
 ───────────────────────────────────────── */
 
+@media (max-width: 1024px) {
+  .main-listing-sidebar {
+    grid-template-columns: 200px 1fr;
+    gap: 1.5rem;
+  }
+
+  #product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.4rem;
+  }
+}
+
 @media (max-width: 768px) {
+  .main-listing {
+    padding: 1.5rem;
+  }
+
   .main-listing-sidebar {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -375,6 +391,39 @@
   .listing-top-bar {
     flex-direction: column;
     align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .listing-sort {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-listing {
+    padding: 1rem;
+  }
+
+  .listing-sidebar-box1 ul {
+    gap: 0.4rem;
+  }
+
+  .listing-sidebar-box1 a {
+    font-size: 0.82rem;
+    padding: 0.4rem 0.6rem;
+  }
+
+  #product-grid {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .product-card img {
+    height: 130px;
+  }
+
+  .main-listing-pagination-wrapper {
     gap: 1rem;
   }
 }
