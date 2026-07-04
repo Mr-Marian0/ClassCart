@@ -1,3 +1,5 @@
+import { createTimeline, stagger, utils, splitText } from "https://cdn.jsdelivr.net/npm/animejs/+esm";
+
 // Top Seller Section
 fetch("data/products.json")
   .then((res) => res.json())
@@ -140,3 +142,110 @@ function renderFeatured(products, category) {
     grid.classList.remove("flip");
   }, 400);
 }
+
+// ================= HERO TEXT ANIMATION =================
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const hero = document.querySelector(".hero");
+    const heroTitle = document.querySelector(".hero-content h1");
+    const heroSubhead = document.querySelector(".hero-subhead");
+
+    if (!hero || !heroTitle || !heroSubhead) return;
+
+    function splitWords(element) {
+
+        const text = element.textContent.trim();
+
+        element.innerHTML = "";
+
+        text.split(" ").forEach(word => {
+
+            const wrapper = document.createElement("span");
+            wrapper.className = "word-wrapper";
+
+            const span = document.createElement("span");
+            span.className = "word";
+            span.textContent = word;
+
+            wrapper.appendChild(span);
+            element.appendChild(wrapper);
+
+            element.append(" ");
+
+        });
+
+    }
+
+    splitWords(heroTitle);
+    splitWords(heroSubhead);
+
+    const words = document.querySelectorAll(".word");
+
+    let visible = false;
+
+    function intro() {
+
+        createTimeline({
+            defaults: {
+                duration: 650,
+                ease: "out(3)"
+            }
+        })
+
+        .add(words, {
+            y: ["100%", "0%"],
+            opacity: [0, 1]
+        }, stagger(60))
+
+        .init();
+
+    }
+
+    function outro() {
+
+        createTimeline({
+            defaults: {
+                duration: 450,
+                ease: "in(3)"
+            }
+        })
+
+        .add(words, {
+            y: ["0%", "-100%"],
+            opacity: [1, 0]
+        }, stagger(25))
+
+        .init();
+
+    }
+
+    const observer = new IntersectionObserver(entries => {
+
+        entries.forEach(entry => {
+
+            if (entry.isIntersecting && !visible) {
+
+                visible = true;
+                intro();
+
+            }
+
+            if (!entry.isIntersecting && visible) {
+
+                visible = false;
+                outro();
+
+            }
+
+        });
+
+    }, {
+
+        threshold: 0.35
+
+    });
+
+    observer.observe(hero);
+
+});
