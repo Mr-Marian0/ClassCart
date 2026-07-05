@@ -1,8 +1,13 @@
 <!-- ── SITE HEADER ── -->
 <nav class="site-header">
   <div class="header-inner">
-
-    
+    <!-- Logo with Emie -->
+    <a href="index.html" class="header-logo">
+      <div class="logo-emie-container">
+        <img src="assets/images/static_emie.png" alt="Emie" class="logo-emie" />
+      </div>
+      <span class="logo-text">Class<span class="logo-cart">Cart</span></span>
+    </a>
 
     <!-- Nav -->
     <ul class="header-nav">
@@ -13,7 +18,6 @@
 
     <!-- Actions -->
     <div class="header-actions">
-
       <!-- Search bar (expands) -->
       <div class="header-search" id="header-search">
         <div class="search-inner">
@@ -29,21 +33,39 @@
 
       <!-- Search icon -->
       <button class="header-icon-btn" id="search-btn" aria-label="Search">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
         </svg>
       </button>
 
       <!-- Cart icon -->
       <a href="cart.html" class="header-icon-btn cart-link" aria-label="Cart">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-          <line x1="3" y1="6" x2="21" y2="6"/>
-          <path d="M16 10a4 4 0 0 1-8 0"/>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
         </svg>
         <span class="cart-count" id="cart-count"></span>
       </a>
-
     </div>
   </div>
 </nav>
