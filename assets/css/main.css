@@ -45,6 +45,7 @@ html, body {
   justify-content: center;
   gap: 1.5rem;
   padding-right: 1rem;
+  min-width: 0;
 }
 
 .hero-badge {
@@ -134,6 +135,7 @@ html, body {
   justify-content: center;
   position: relative;
   height: 380px;
+  min-width: 0;
 }
 
 /* Yellow accent shape behind image */
@@ -466,6 +468,7 @@ html, body {
   position: relative;
   display: flex;
   justify-content: center;
+  min-width: 0;
   align-items: center;
   height: 350px;
   border-radius: 12px;
@@ -498,6 +501,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .top-seller-title {
