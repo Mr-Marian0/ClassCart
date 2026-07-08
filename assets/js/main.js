@@ -1,12 +1,18 @@
 import { createTimeline, stagger, utils, splitText } from "https://cdn.jsdelivr.net/npm/animejs/+esm";
+import { supabase } from "./supabaseClient.js";
 
 // Top Seller Section
-fetch("data/products.json")
-  .then((res) => res.json())
-  .then((products) => {
-    // Find top seller by soldCount
+supabase
+  .from("products")
+  .select("*")
+  .then(({ data: products, error }) => {
+    if (error) {
+      console.error("Error loading products:", error);
+      return;
+    }
+    // Find top seller by sold_count
     const topSeller = products.reduce((max, product) => 
-      product.soldCount > max.soldCount ? product : max
+      product.sold_count > max.sold_count ? product : max
     );
 
     renderTopSeller(topSeller);
@@ -41,7 +47,7 @@ function renderTopSeller(product) {
          class="best-seller-badge">
 
     <div class="top-seller-image">
-      <img src="${product.sampleImage}" alt="${product.name}">
+      <img src="${product.sample_image}" alt="${product.name}">
       <div class="top-seller-badge">Hot Pick of the Month!</div>
     </div>
     
@@ -50,7 +56,7 @@ function renderTopSeller(product) {
       <span class="top-seller-price">₱${product.price}</span>
       <div class="top-seller-sold">
         <span>Customers are loving it:</span>
-        <span class="top-seller-sold-badge">${product.soldCount.toLocaleString()}+ sold</span>
+        <span class="top-seller-sold-badge">${product.sold_count.toLocaleString()}+ sold</span>
       </div>
       
       <div class="top-seller-cta-group">
@@ -69,7 +75,7 @@ function renderTopSeller(product) {
       name: product.name,
       category: product.category,
       price: product.price,
-      image: product.sampleImage,
+      image: product.sample_image,
       quantity: 1,
     };
 
@@ -124,7 +130,7 @@ function renderFeatured(products, category) {
       const card = document.createElement("div");
       card.classList.add("product-card");
       card.innerHTML = `
-        <img src="${product.sampleImage}" alt="${product.name}">
+        <img src="${product.sample_image}" alt="${product.name}">
         <div class="product-card-details">
           <h3 class="product-card-name">${product.name}</h3>
           <span class="product-card-price">₱${product.price}</span>

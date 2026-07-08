@@ -1,3 +1,5 @@
+import { supabase } from "./supabaseClient.js";
+
 const PRODUCTS_PER_PAGE = 12;
 let currentPage = 1;
 let allProducts = [];
@@ -14,9 +16,14 @@ let filters = {
 };
 
 // Fetch products
-fetch("data/products.json")
-  .then((response) => response.json())
-  .then((products) => {
+supabase
+  .from("products")
+  .select("*")
+  .then(({ data: products, error }) => {
+    if (error) {
+      console.error("Error loading products:", error);
+      return;
+    }
     allProducts = products;
     
     // If search query, start with search filter
@@ -97,7 +104,7 @@ function renderPage(page) {
     const card = document.createElement("div");
     card.classList.add("product-card");
     card.innerHTML = `
-      <img src="${product.sampleImage}" alt="${product.name}">
+      <img src="${product.sample_image}" alt="${product.name}">
       <div class="product-card-details">
         <h3 class="product-card-name">${product.name}</h3>
         <span class="product-card-price">₱${product.price}</span>

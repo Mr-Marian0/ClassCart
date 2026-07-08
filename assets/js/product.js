@@ -1,13 +1,15 @@
 // Product Details Section
+import { supabase } from "./supabaseClient.js";
 
 const params = new URLSearchParams(window.location.search);
 const productId = parseInt(params.get("id"));
 
-fetch("data/products.json")
-  .then((res) => res.json())
-  .then((products) => {
-    const product = products.find((p) => p.id === productId);
-    if (!product) {
+supabase.from("products")
+  .select("*")
+  .eq("id", productId)
+  .single()
+  .then(({ data: product, error }) => {
+    if (error || !product) {
       document.getElementById("product-title").textContent = "Product not found";
       return;
     }
@@ -22,7 +24,7 @@ fetch("data/products.json")
       `<span class="stars">${"★".repeat(stars)}${"☆".repeat(5 - stars)}</span> <span>(${product.rating || 4}.0)</span>`;
 
     // Build all images (sampleImage + additionalImages)
-    const allImages = [product.sampleImage, ...(product.additionalImages || [])];
+    const allImages = [product.sample_image, ...(product.additional_images || [])];
 
     // Main showcase
     const showcase = document.getElementById("img-showcase");
@@ -66,7 +68,7 @@ fetch("data/products.json")
         name: product.name,
         category: product.category,
         price: product.price,
-        image: product.sampleImage,
+        image: product.sample_image,
         quantity: quantity,
       };
 
