@@ -1,3 +1,5 @@
+import { supabase } from "./supabaseClient.js";
+
 function getCart() {
   return JSON.parse(localStorage.getItem('cart')) || [];
 }
@@ -129,9 +131,9 @@ document.addEventListener('click', (e) => {
 });
 
 // Checkout button
-document.getElementById('checkout-btn').addEventListener('click', () => {
-  const user = localStorage.getItem('loggedInUser');
-  if (!user) {
+document.getElementById('checkout-btn').addEventListener('click', async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
     localStorage.setItem('redirectAfterLogin', 'checkout.html');
     window.location.href = 'account.html';
     return;

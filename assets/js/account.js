@@ -1,3 +1,5 @@
+import { supabase } from "./supabaseClient.js";
+
 // Tab switching
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("account-tab") || e.target.dataset.tab) {
@@ -13,7 +15,7 @@ document.addEventListener("click", (e) => {
 });
 
 // Register
-document.getElementById("register-btn").addEventListener("click", () => {
+document.getElementById("register-btn").addEventListener("click", async () => {
   const name = document.getElementById("reg-name").value.trim();
   const email = document.getElementById("reg-email").value.trim();
   const password = document.getElementById("reg-password").value.trim();
@@ -23,16 +25,23 @@ document.getElementById("register-btn").addEventListener("click", () => {
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const exists = users.find((u) => u.email === email);
+  // Create the real, secure account (Supabase handles password hashing)
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
-  if (exists) {
-    alert("Email already registered.");
+  if (error) {
+    alert(error.message);
     return;
   }
 
-  users.push({ name, email, password });
-  localStorage.setItem("users", JSON.stringify(users));
+  // Create the matching profile row (name + admin flag)
+  const { error: profileError } = await supabase
+    .from("profile")
+    .insert({ id: data.user.id, name, is_admin: false });
+
+  if (profileError) {
+    alert("Account created, but profile setup failed: " + profileError.message);
+    return;
+  }
 
   // Emie welcome reaction
   if (window.emieReact) {
@@ -55,7 +64,7 @@ document.getElementById("register-btn").addEventListener("click", () => {
 });
 
 // Login
-document.getElementById("login-btn").addEventListener("click", () => {
+document.getElementById("login-btn").addEventListener("click", async () => {
   const email = document.getElementById("login-email").value.trim();
   const password = document.getElementById("login-password").value.trim();
 
@@ -64,12 +73,11 @@ document.getElementById("login-btn").addEventListener("click", () => {
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const user = users.find((u) => u.email === email && u.password === password);
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (!user) {
+  if (error) {
     alert("Invalid email or password.");
-    
+
     if (window.emieReact) {
       window.emieReact(
         "assets/gifs/angry_emie.gif",
@@ -80,19 +88,34 @@ document.getElementById("login-btn").addEventListener("click", () => {
     return;
   }
 
-  localStorage.setItem("loggedInUser", JSON.stringify(user));
+  // Look up the profile to get name + admin status
+  const { data: profile, error: profileError } = await supabase
+    .from("profile")
+    .select("name, is_admin")
+    .eq("id", data.user.id)
+    .single();
+
+  if (profileError) {
+    alert("Logged in, but couldn't load profile: " + profileError.message);
+    return;
+  }
 
   // Emie login celebration
   if (window.emieReact) {
     window.emieReact(
       "assets/gifs/kilig_emie.gif",
-      `Welcome back, ${user.name}! Ready to shop? 🛍`,
+      `Welcome back, ${profile.name}! Ready to shop? 🛍`,
       2500
     );
   }
 
-  // Redirect back to checkout if came from there
   setTimeout(() => {
+    if (profile.is_admin) {
+      window.location.href = "admin.html";
+      return;
+    }
+
+    // Redirect back to checkout if came from there
     const redirect = localStorage.getItem("redirectAfterLogin");
     if (redirect) {
       localStorage.removeItem("redirectAfterLogin");
