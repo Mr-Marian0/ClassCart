@@ -22,7 +22,7 @@ fetch("components/header.html")
     });
 
     document.addEventListener("click", (e) => {
-      if (!searchBar.contains(e.target) && e.target !== searchBtn) {
+      if (!searchBar.contains(e.target) && !searchBtn.contains(e.target)) {
         searchBar.classList.remove("open");
       }
     });
