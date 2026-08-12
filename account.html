@@ -12,7 +12,8 @@
     <!---------------------- Header Placeholder ---------------------->
     <div class="main-header" id="header-placeholder"></div>
 
-    <main class="account-page">
+    <!---------------------- LOGGED-OUT: Login / Register ---------------------->
+    <main class="account-page" id="auth-view">
       <div class="account-card">
         <!-- Tabs -->
         <div class="account-tabs">
@@ -66,6 +67,244 @@
         </div>
       </div>
     </main>
+
+    <!---------------------- LOGGED-IN: Account Dashboard ---------------------->
+    <main class="dash-page" id="dashboard-view" hidden>
+      <div class="dash-shell">
+
+        <!-- Sidebar / bottom nav -->
+        <nav class="dash-nav" aria-label="Account sections">
+          <button class="dash-nav-btn active" data-panel="orders" type="button">
+            <svg class="dash-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7 12 3 4 7v10l8 4 8-4V7Z"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/></svg>
+            <span>Order History</span>
+          </button>
+          <button class="dash-nav-btn" data-panel="profile" type="button">
+            <svg class="dash-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4.5 5-6 8-6s6.5 1.5 8 6"/></svg>
+            <span>Profile Info</span>
+          </button>
+          <button class="dash-nav-btn" data-panel="addresses" type="button">
+            <svg class="dash-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>
+            <span>Saved Addresses</span>
+          </button>
+          <button class="dash-nav-btn" data-panel="wishlist" type="button">
+            <svg class="dash-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S3.5 15.4 3.5 9.6A4.6 4.6 0 0 1 12 6.8a4.6 4.6 0 0 1 8.5 2.8c0 5.8-8.5 10.9-8.5 10.9Z"/></svg>
+            <span>Wishlist</span>
+          </button>
+
+          <button class="dash-nav-logout" id="logout-btn" type="button">
+            <svg class="dash-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+            <span>Log Out</span>
+          </button>
+        </nav>
+
+        <!-- Content -->
+        <div class="dash-content">
+
+          <!-- ===== ORDER HISTORY ===== -->
+          <section class="dash-panel active" id="panel-orders">
+            <div class="orders-head">
+              <h1>Your Orders <span class="orders-count-badge" id="orders-count">0</span></h1>
+            </div>
+
+            <div class="orders-subtabs">
+              <button class="orders-subtab active" data-filter="all">Orders</button>
+              <button class="orders-subtab" data-filter="not-shipped">Not Yet Shipped</button>
+              <button class="orders-subtab" data-filter="cancelled">Cancelled Orders</button>
+            </div>
+
+            <div id="orders-list" class="orders-list"></div>
+            <p class="empty-state" id="orders-empty" hidden>
+              No orders here yet. When you place an order, it'll show up in this list.
+            </p>
+          </section>
+
+          <!-- ===== PROFILE INFO ===== -->
+          <section class="dash-panel" id="panel-profile">
+            <h1>Profile Info</h1>
+
+            <div class="profile-card">
+              <div class="profile-avatar" id="profile-avatar">?</div>
+              <div class="profile-card-text">
+                <h2 id="profile-name">—</h2>
+                <p id="profile-email">—</p>
+              </div>
+            </div>
+
+            <div class="settings-list">
+              <button class="settings-row" id="open-edit-name" type="button">
+                <span>Edit Name</span>
+                <span class="settings-row-arrow">›</span>
+              </button>
+              <button class="settings-row" id="open-change-password" type="button">
+                <span>Change Password</span>
+                <span class="settings-row-arrow">›</span>
+              </button>
+              <button class="settings-row danger" id="open-delete-account" type="button">
+                <span>Delete Account</span>
+                <span class="settings-row-arrow">›</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- ===== SAVED ADDRESSES ===== -->
+          <section class="dash-panel" id="panel-addresses">
+            <div class="panel-head">
+              <h1>Saved Addresses</h1>
+              <button class="btn-primary-sm" id="add-address-btn" type="button">+ Add New Address</button>
+            </div>
+
+            <div class="address-grid" id="address-list"></div>
+            <p class="empty-state" id="addresses-empty" hidden>
+              No saved addresses yet. Add one so checkout is faster next time.
+            </p>
+          </section>
+
+          <!-- ===== WISHLIST ===== -->
+          <section class="dash-panel" id="panel-wishlist">
+            <div class="panel-head">
+              <h1>Wishlist</h1>
+            </div>
+
+            <div class="wishlist-grid" id="wishlist-list"></div>
+            <p class="empty-state" id="wishlist-empty" hidden>
+              Nothing saved yet. Tap the heart icon on any product to add it here.
+            </p>
+          </section>
+
+        </div>
+      </div>
+    </main>
+
+    <!---------------------- MODALS ---------------------->
+
+    <!-- Cancel Order -->
+    <div class="cc-modal" id="cancel-order-modal">
+      <div class="cc-modal-box">
+        <h3>Cancel Order</h3>
+        <p class="cc-modal-sub">Let us know why you're cancelling order <strong id="cancel-order-id"></strong>.</p>
+        <div class="form-group">
+          <label for="cancel-reason-select">Reason</label>
+          <select id="cancel-reason-select">
+            <option value="">Select a reason</option>
+            <option value="Changed my mind">Changed my mind</option>
+            <option value="Found a better price elsewhere">Found a better price elsewhere</option>
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Item will arrive too late">Item will arrive too late</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="cancel-reason-text">Additional details (optional)</label>
+          <textarea id="cancel-reason-text" rows="3" placeholder="Tell us more…"></textarea>
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="cancel-modal-close" type="button">Never mind</button>
+          <button class="btn-danger" id="cancel-modal-confirm" type="button">Confirm Cancellation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add / Edit Address -->
+    <div class="cc-modal" id="address-modal">
+      <div class="cc-modal-box">
+        <h3 id="address-modal-title">Add New Address</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="addr-label">Label</label>
+            <input type="text" id="addr-label" placeholder="Home, Dorm, Office…" />
+          </div>
+          <div class="form-group">
+            <label for="addr-fullname">Full Name</label>
+            <input type="text" id="addr-fullname" placeholder="Juan Dela Cruz" />
+          </div>
+          <div class="form-group">
+            <label for="addr-phone">Phone Number</label>
+            <input type="text" id="addr-phone" placeholder="09XX XXX XXXX" />
+          </div>
+          <div class="form-group span-2">
+            <label for="addr-line">Address</label>
+            <input type="text" id="addr-line" placeholder="123 Rizal Street" />
+          </div>
+          <div class="form-group">
+            <label for="addr-city">City</label>
+            <input type="text" id="addr-city" placeholder="Manila" />
+          </div>
+          <div class="form-group">
+            <label for="addr-province">Province</label>
+            <input type="text" id="addr-province" placeholder="Metro Manila" />
+          </div>
+          <div class="form-group">
+            <label for="addr-zip">ZIP Code</label>
+            <input type="text" id="addr-zip" placeholder="1000" />
+          </div>
+          <div class="form-group">
+            <label for="addr-country">Country</label>
+            <input type="text" id="addr-country" placeholder="Philippines" value="Philippines" />
+          </div>
+        </div>
+        <label class="cc-checkbox-row">
+          <input type="checkbox" id="addr-default" />
+          <span>Set as default address</span>
+        </label>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="address-modal-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="address-modal-save" type="button">Save Address</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Name -->
+    <div class="cc-modal" id="edit-name-modal">
+      <div class="cc-modal-box">
+        <h3>Edit Name</h3>
+        <div class="form-group">
+          <label for="edit-name-input">Full Name</label>
+          <input type="text" id="edit-name-input" placeholder="Juan Dela Cruz" />
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="edit-name-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="edit-name-save" type="button">Save Changes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="cc-modal" id="change-password-modal">
+      <div class="cc-modal-box">
+        <h3>Change Password</h3>
+        <p class="cc-modal-sub">You're signed in, so this updates your password right away — no need to enter the old one.</p>
+        <div class="form-group">
+          <label for="new-password-input">New Password</label>
+          <input type="password" id="new-password-input" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <label for="confirm-password-input">Confirm New Password</label>
+          <input type="password" id="confirm-password-input" placeholder="••••••••" />
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="change-password-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="change-password-save" type="button">Update Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account -->
+    <div class="cc-modal" id="delete-account-modal">
+      <div class="cc-modal-box">
+        <h3>Delete Account</h3>
+        <p class="cc-modal-sub">
+          This signs you out and removes your saved addresses and wishlist from this device.
+          Type <strong>DELETE</strong> below to confirm.
+        </p>
+        <div class="form-group">
+          <input type="text" id="delete-confirm-input" placeholder="Type DELETE to confirm" />
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="delete-account-close" type="button">Cancel</button>
+          <button class="btn-danger" id="delete-account-confirm" type="button">Delete My Account</button>
+        </div>
+      </div>
+    </div>
 
     <!------------------------- Footer Placeholder --------------------------->
     <div class="footer" id="footer-placeholder"></div>

@@ -112,6 +112,63 @@ supabase.from("products")
         btn.style.background = "var(--cc-yellow)";
       }, 2000);
     });
+
+    // Wishlist toggle (per logged-in user; account.js sets ccUserId on login)
+    const wishlistBtn = document.getElementById("wishlist-toggle-btn");
+
+    function wishlistKey() {
+      const uid = localStorage.getItem("ccUserId");
+      return uid ? `wishlist_${uid}` : null;
+    }
+
+    function getWishlist() {
+      const key = wishlistKey();
+      if (!key) return [];
+      return JSON.parse(localStorage.getItem(key)) || [];
+    }
+
+    function isSaved() {
+      return getWishlist().some((i) => i.id === product.id);
+    }
+
+    function refreshWishlistBtn() {
+      const saved = isSaved();
+      wishlistBtn.classList.toggle("saved", saved);
+      wishlistBtn.setAttribute("aria-pressed", String(saved));
+    }
+
+    refreshWishlistBtn();
+
+    wishlistBtn.addEventListener("click", () => {
+      const key = wishlistKey();
+      if (!key) {
+        alert("Please log in to save items to your wishlist.");
+        window.location.href = "account.html";
+        return;
+      }
+
+      let list = getWishlist();
+      if (isSaved()) {
+        list = list.filter((i) => i.id !== product.id);
+      } else {
+        list.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.sample_image,
+        });
+      }
+      localStorage.setItem(key, JSON.stringify(list));
+      refreshWishlistBtn();
+
+      if (window.emieReact) {
+        window.emieReact(
+          "assets/gifs/kilig_emie.gif",
+          isSaved() ? `Saved ${product.name} to your wishlist!` : `Removed from wishlist.`,
+          2000
+        );
+      }
+    });
   });
 
 // Handle window resize for image slider

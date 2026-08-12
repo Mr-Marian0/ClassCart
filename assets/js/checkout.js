@@ -56,10 +56,11 @@ document.getElementById("place-order-btn").addEventListener("click", () => {
 
   const order = {
     id: Date.now(),
+    userId: localStorage.getItem("ccUserId") || null,
     items: cart,
     delivery: { name, address, city, province, zip, country },
     payment: payment,
-    status: "Pending",
+    status: "Processing",
     date: new Date().toLocaleDateString(),
   };
 
