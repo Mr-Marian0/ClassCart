@@ -31,28 +31,9 @@ function getUserId() {
    a userId field on each order.
 ═══════════════════════════════════════════════════════════════ */
 
-const addressesKey = (uid) => `addresses_${uid}`;
-const wishlistKey = (uid) => `wishlist_${uid}`;
+/* Orders, addresses, and wishlist all now live in Supabase. See the
+   ORDER HISTORY / SAVED ADDRESSES / WISHLIST sections further down. */
 
-/* Orders now live in Supabase (orders + order_items tables) — see the
-   ORDER HISTORY section further down. Addresses/wishlist stay in
-   localStorage for now. */
-
-function getAddresses(uid) {
-  return JSON.parse(localStorage.getItem(addressesKey(uid))) || [];
-}
-
-function saveAddresses(uid, list) {
-  localStorage.setItem(addressesKey(uid), JSON.stringify(list));
-}
-
-function getWishlist(uid) {
-  return JSON.parse(localStorage.getItem(wishlistKey(uid))) || [];
-}
-
-function saveWishlist(uid, list) {
-  localStorage.setItem(wishlistKey(uid), JSON.stringify(list));
-}
 
 /* ═══════════════════════════════════════════════════════════════
    VIEW SWITCHING (auth view <-> dashboard)
@@ -610,14 +591,26 @@ document.getElementById("delete-account-confirm").addEventListener("click", asyn
   }
 
   const uid = getUserId();
-  localStorage.removeItem(addressesKey(uid));
-  localStorage.removeItem(wishlistKey(uid));
+  await supabase.from("addresses").delete().eq("user_id", uid);
+  await supabase.from("wishlist").delete().eq("user_id", uid);
+
+  // Cancel any orders that are still in-flight (Processing/Shipped) —
+  // no one's coming back to fulfill or receive them after this.
+  await supabase
+    .from("orders")
+    .update({
+      status: "Cancelled",
+      cancel_reason: "Account deleted",
+      cancelled_at: new Date().toISOString(),
+    })
+    .eq("user_id", uid)
+    .not("status", "in", "(Cancelled,Delivered)");
 
   await supabase.auth.signOut();
   clearCachedUser();
 
   document.getElementById("delete-account-modal").classList.remove("active");
-  alert("Your account data on this device has been cleared and you've been signed out.");
+  alert("Your saved addresses and wishlist have been deleted, any open orders were cancelled, and you've been signed out.");
   showAuthView();
 });
 
@@ -625,32 +618,50 @@ document.getElementById("delete-account-confirm").addEventListener("click", asyn
    SAVED ADDRESSES
 ═══════════════════════════════════════════════════════════════ */
 
-function renderAddresses() {
+let cachedAddresses = []; // last fetch, reused by edit/set-default/remove handlers
+
+async function renderAddresses() {
   const uid = getUserId();
   const list = document.getElementById("address-list");
   const empty = document.getElementById("addresses-empty");
-  const addresses = getAddresses(uid);
 
+  const { data: addresses, error } = await supabase
+    .from("addresses")
+    .select("*")
+    .eq("user_id", uid)
+    .order("is_default", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load addresses:", error);
+    list.innerHTML = "";
+    empty.hidden = false;
+    empty.textContent = "Couldn't load your addresses (" + error.message + ").";
+    return;
+  }
+
+  cachedAddresses = addresses || [];
   list.innerHTML = "";
 
-  if (addresses.length === 0) {
+  if (cachedAddresses.length === 0) {
     empty.hidden = false;
+    empty.textContent = "No saved addresses yet. Add one so checkout is faster next time.";
     return;
   }
   empty.hidden = true;
 
-  addresses.forEach((addr) => {
+  cachedAddresses.forEach((addr) => {
     const card = document.createElement("div");
-    card.className = `address-card ${addr.isDefault ? "default" : ""}`;
+    card.className = `address-card ${addr.is_default ? "default" : ""}`;
     card.innerHTML = `
-      ${addr.isDefault ? '<span class="default-badge">Default</span>' : ""}
+      ${addr.is_default ? '<span class="default-badge">Default</span>' : ""}
       <p class="address-label">${addr.label || "Address"}</p>
-      <p>${addr.fullName}</p>
+      <p>${addr.full_name}</p>
       <p>${addr.phone}</p>
-      <p>${addr.addressLine}, ${addr.city}, ${addr.province} ${addr.zip}</p>
+      <p>${addr.address_line}, ${addr.city}, ${addr.province} ${addr.zip}</p>
       <p>${addr.country}</p>
       <div class="address-actions">
-        ${!addr.isDefault ? `<button class="link-btn set-default" data-id="${addr.id}">Set as default</button>` : ""}
+        ${!addr.is_default ? `<button class="link-btn set-default" data-id="${addr.id}">Set as default</button>` : ""}
         <button class="link-btn edit-address" data-id="${addr.id}">Edit</button>
         <button class="link-btn danger remove-address" data-id="${addr.id}">Remove</button>
       </div>
@@ -674,7 +685,7 @@ document.getElementById("address-modal-close").addEventListener("click", () => {
   document.getElementById("address-modal").classList.remove("active");
 });
 
-document.getElementById("address-modal-save").addEventListener("click", () => {
+document.getElementById("address-modal-save").addEventListener("click", async () => {
   const uid = getUserId();
   const modal = document.getElementById("address-modal");
   const editId = modal.dataset.editId;
@@ -687,77 +698,100 @@ document.getElementById("address-modal-save").addEventListener("click", () => {
   const zip = document.getElementById("addr-zip").value.trim();
   const country = document.getElementById("addr-country").value.trim();
   const label = document.getElementById("addr-label").value.trim() || "Address";
-  const isDefault = document.getElementById("addr-default").checked;
+  const isDefault = document.getElementById("addr-default").checked || cachedAddresses.length === 0;
 
   if (!fullName || !phone || !addressLine || !city || !province || !zip || !country) {
     alert("Please fill in all fields.");
     return;
   }
 
-  let addresses = getAddresses(uid);
+  const saveBtn = document.getElementById("address-modal-save");
+  saveBtn.disabled = true;
 
+  // If this address is becoming the default, unset default on every other
+  // address first — a user should only ever have one default at a time.
   if (isDefault) {
-    addresses = addresses.map((a) => ({ ...a, isDefault: false }));
+    let unsetQuery = supabase.from("addresses").update({ is_default: false }).eq("user_id", uid);
+    if (editId) unsetQuery = unsetQuery.neq("id", editId);
+    const { error: unsetError } = await unsetQuery;
+    if (unsetError) {
+      console.error("Failed to clear previous default:", unsetError);
+      alert("Couldn't save this address: " + unsetError.message);
+      saveBtn.disabled = false;
+      return;
+    }
   }
 
-  if (editId) {
-    addresses = addresses.map((a) =>
-      a.id == editId ? { ...a, label, fullName, phone, addressLine, city, province, zip, country, isDefault } : a
-    );
-  } else {
-    addresses.push({
-      id: Date.now(),
-      label,
-      fullName,
-      phone,
-      addressLine,
-      city,
-      province,
-      zip,
-      country,
-      isDefault: isDefault || addresses.length === 0, // first address defaults automatically
-    });
+  const row = {
+    label,
+    full_name: fullName,
+    phone,
+    address_line: addressLine,
+    city,
+    province,
+    zip,
+    country,
+    is_default: isDefault,
+  };
+
+  const { error } = editId
+    ? await supabase.from("addresses").update(row).eq("id", editId)
+    : await supabase.from("addresses").insert({ ...row, user_id: uid });
+
+  saveBtn.disabled = false;
+
+  if (error) {
+    console.error("Failed to save address:", error);
+    alert("Couldn't save this address: " + error.message);
+    return;
   }
 
-  saveAddresses(uid, addresses);
   modal.classList.remove("active");
   renderAddresses();
 });
 
-document.getElementById("address-list").addEventListener("click", (e) => {
+document.getElementById("address-list").addEventListener("click", async (e) => {
   const uid = getUserId();
   const setDefaultBtn = e.target.closest(".set-default");
   const editBtn = e.target.closest(".edit-address");
   const removeBtn = e.target.closest(".remove-address");
 
   if (setDefaultBtn) {
-    let addresses = getAddresses(uid).map((a) => ({ ...a, isDefault: a.id == setDefaultBtn.dataset.id }));
-    saveAddresses(uid, addresses);
+    const id = setDefaultBtn.dataset.id;
+    await supabase.from("addresses").update({ is_default: false }).eq("user_id", uid);
+    const { error } = await supabase.from("addresses").update({ is_default: true }).eq("id", id);
+    if (error) {
+      alert("Couldn't set default address: " + error.message);
+      return;
+    }
     renderAddresses();
   }
 
   if (editBtn) {
-    const addr = getAddresses(uid).find((a) => a.id == editBtn.dataset.id);
+    const addr = cachedAddresses.find((a) => a.id == editBtn.dataset.id);
     if (!addr) return;
 
     document.getElementById("address-modal-title").textContent = "Edit Address";
     document.getElementById("address-modal").dataset.editId = addr.id;
     document.getElementById("addr-label").value = addr.label || "";
-    document.getElementById("addr-fullname").value = addr.fullName;
+    document.getElementById("addr-fullname").value = addr.full_name;
     document.getElementById("addr-phone").value = addr.phone;
-    document.getElementById("addr-line").value = addr.addressLine;
+    document.getElementById("addr-line").value = addr.address_line;
     document.getElementById("addr-city").value = addr.city;
     document.getElementById("addr-province").value = addr.province;
     document.getElementById("addr-zip").value = addr.zip;
     document.getElementById("addr-country").value = addr.country;
-    document.getElementById("addr-default").checked = !!addr.isDefault;
+    document.getElementById("addr-default").checked = !!addr.is_default;
     document.getElementById("address-modal").classList.add("active");
   }
 
   if (removeBtn) {
     if (!confirm("Remove this address?")) return;
-    const addresses = getAddresses(uid).filter((a) => a.id != removeBtn.dataset.id);
-    saveAddresses(uid, addresses);
+    const { error } = await supabase.from("addresses").delete().eq("id", removeBtn.dataset.id);
+    if (error) {
+      alert("Couldn't remove this address: " + error.message);
+      return;
+    }
     renderAddresses();
   }
 });
@@ -767,29 +801,51 @@ document.getElementById("address-list").addEventListener("click", (e) => {
    Items get added from product.html via window.ccToggleWishlist().
 ═══════════════════════════════════════════════════════════════ */
 
-function renderWishlist() {
+let cachedWishlist = []; // last fetch, reused by remove/move-to-cart handlers
+
+async function renderWishlist() {
   const uid = getUserId();
   const list = document.getElementById("wishlist-list");
   const empty = document.getElementById("wishlist-empty");
-  const items = getWishlist(uid);
 
+  // products(*) pulls each wishlist row's current product data via the
+  // wishlist.product_id -> products.id foreign key, so it's always fresh
+  // (unlike orders, which snapshot the price at time of purchase).
+  const { data: items, error } = await supabase
+    .from("wishlist")
+    .select("id, product_id, products(*)")
+    .eq("user_id", uid)
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load wishlist:", error);
+    list.innerHTML = "";
+    empty.hidden = false;
+    empty.textContent = "Couldn't load your wishlist (" + error.message + ").";
+    return;
+  }
+
+  // Skip rows where the linked product no longer exists.
+  cachedWishlist = (items || []).filter((i) => i.products);
   list.innerHTML = "";
 
-  if (items.length === 0) {
+  if (cachedWishlist.length === 0) {
     empty.hidden = false;
+    empty.textContent = "Nothing saved yet. Tap the heart icon on any product to add it here.";
     return;
   }
   empty.hidden = true;
 
-  items.forEach((item) => {
+  cachedWishlist.forEach((item) => {
+    const p = item.products;
     const card = document.createElement("div");
     card.className = "wishlist-card";
     card.innerHTML = `
       <button class="wishlist-remove-btn" data-id="${item.id}" title="Remove from wishlist">×</button>
-      <img src="${item.image}" alt="${item.name}">
+      <img src="${p.sample_image}" alt="${p.name}">
       <div class="wishlist-card-details">
-        <p class="wishlist-card-name">${item.name}</p>
-        <p class="wishlist-card-price">₱${Number(item.price).toFixed(2)}</p>
+        <p class="wishlist-card-name">${p.name}</p>
+        <p class="wishlist-card-price">₱${Number(p.price).toFixed(2)}</p>
         <button class="product-add-btn move-to-cart" data-id="${item.id}">Add to Cart</button>
       </div>
     `;
@@ -797,32 +853,35 @@ function renderWishlist() {
   });
 }
 
-document.getElementById("wishlist-list").addEventListener("click", (e) => {
-  const uid = getUserId();
+document.getElementById("wishlist-list").addEventListener("click", async (e) => {
   const removeBtn = e.target.closest(".wishlist-remove-btn");
   const cartBtn = e.target.closest(".move-to-cart");
 
   if (removeBtn) {
-    const items = getWishlist(uid).filter((i) => i.id != removeBtn.dataset.id);
-    saveWishlist(uid, items);
+    const { error } = await supabase.from("wishlist").delete().eq("id", removeBtn.dataset.id);
+    if (error) {
+      alert("Couldn't remove this item: " + error.message);
+      return;
+    }
     renderWishlist();
   }
 
   if (cartBtn) {
-    const item = getWishlist(uid).find((i) => i.id == cartBtn.dataset.id);
+    const item = cachedWishlist.find((i) => i.id == cartBtn.dataset.id);
     if (!item) return;
+    const p = item.products;
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existing = cart.find((c) => c.id === item.id);
+    const existing = cart.find((c) => c.id === p.id);
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ id: item.id, name: item.name, price: item.price, image: item.image, quantity: 1 });
+      cart.push({ id: p.id, name: p.name, price: p.price, image: p.sample_image, quantity: 1 });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
 
     if (window.emieReact) {
-      window.emieReact("assets/gifs/kilig_emie.gif", `${item.name} added to your cart!`, 2200);
+      window.emieReact("assets/gifs/kilig_emie.gif", `${p.name} added to your cart!`, 2200);
     }
   }
 });

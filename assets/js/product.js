@@ -116,58 +116,71 @@ supabase.from("products")
     // Wishlist toggle (per logged-in user; account.js sets ccUserId on login)
     const wishlistBtn = document.getElementById("wishlist-toggle-btn");
 
-    function wishlistKey() {
+    let wishlistRowId = null; // set once we know this product is saved
+
+    async function refreshWishlistBtn() {
       const uid = localStorage.getItem("ccUserId");
-      return uid ? `wishlist_${uid}` : null;
-    }
+      if (!uid) {
+        wishlistRowId = null;
+        wishlistBtn.classList.remove("saved");
+        wishlistBtn.setAttribute("aria-pressed", "false");
+        return;
+      }
 
-    function getWishlist() {
-      const key = wishlistKey();
-      if (!key) return [];
-      return JSON.parse(localStorage.getItem(key)) || [];
-    }
+      const { data, error } = await supabase
+        .from("wishlist")
+        .select("id")
+        .eq("user_id", uid)
+        .eq("product_id", product.id)
+        .maybeSingle();
 
-    function isSaved() {
-      return getWishlist().some((i) => i.id === product.id);
-    }
+      if (error) {
+        console.error("Failed to check wishlist status:", error);
+        return;
+      }
 
-    function refreshWishlistBtn() {
-      const saved = isSaved();
-      wishlistBtn.classList.toggle("saved", saved);
-      wishlistBtn.setAttribute("aria-pressed", String(saved));
+      wishlistRowId = data ? data.id : null;
+      wishlistBtn.classList.toggle("saved", !!wishlistRowId);
+      wishlistBtn.setAttribute("aria-pressed", String(!!wishlistRowId));
     }
 
     refreshWishlistBtn();
 
-    wishlistBtn.addEventListener("click", () => {
-      const key = wishlistKey();
-      if (!key) {
+    wishlistBtn.addEventListener("click", async () => {
+      const uid = localStorage.getItem("ccUserId");
+      if (!uid) {
         alert("Please log in to save items to your wishlist.");
         window.location.href = "account.html";
         return;
       }
 
-      let list = getWishlist();
-      if (isSaved()) {
-        list = list.filter((i) => i.id !== product.id);
-      } else {
-        list.push({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.sample_image,
-        });
-      }
-      localStorage.setItem(key, JSON.stringify(list));
-      refreshWishlistBtn();
+      wishlistBtn.disabled = true;
 
-      if (window.emieReact) {
-        window.emieReact(
-          "assets/gifs/kilig_emie.gif",
-          isSaved() ? `Saved ${product.name} to your wishlist!` : `Removed from wishlist.`,
-          2000
-        );
+      if (wishlistRowId) {
+        const { error } = await supabase.from("wishlist").delete().eq("id", wishlistRowId);
+        wishlistBtn.disabled = false;
+        if (error) {
+          alert("Couldn't update your wishlist: " + error.message);
+          return;
+        }
+        if (window.emieReact) {
+          window.emieReact("assets/gifs/kilig_emie.gif", `Removed from wishlist.`, 2000);
+        }
+      } else {
+        const { error } = await supabase
+          .from("wishlist")
+          .insert({ user_id: uid, product_id: product.id });
+        wishlistBtn.disabled = false;
+        if (error) {
+          alert("Couldn't update your wishlist: " + error.message);
+          return;
+        }
+        if (window.emieReact) {
+          window.emieReact("assets/gifs/kilig_emie.gif", `Saved ${product.name} to your wishlist!`, 2000);
+        }
       }
+
+      await refreshWishlistBtn();
     });
   });
 
