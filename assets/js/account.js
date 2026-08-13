@@ -34,14 +34,9 @@ function getUserId() {
 const addressesKey = (uid) => `addresses_${uid}`;
 const wishlistKey = (uid) => `wishlist_${uid}`;
 
-function getOrders(uid) {
-  const all = JSON.parse(localStorage.getItem("orders")) || [];
-  return all.filter((o) => o.userId === uid);
-}
-
-function saveAllOrders(all) {
-  localStorage.setItem("orders", JSON.stringify(all));
-}
+/* Orders now live in Supabase (orders + order_items tables) — see the
+   ORDER HISTORY section further down. Addresses/wishlist stay in
+   localStorage for now. */
 
 function getAddresses(uid) {
   return JSON.parse(localStorage.getItem(addressesKey(uid))) || [];
@@ -308,6 +303,7 @@ document.querySelectorAll(".dash-nav-btn").forEach((btn) => {
 ═══════════════════════════════════════════════════════════════ */
 
 let currentOrderFilter = "all";
+let cachedOrders = []; // last fetch, reused by buy-again/cancel handlers
 
 function statusMeta(status) {
   switch (status) {
@@ -322,16 +318,33 @@ function statusMeta(status) {
   }
 }
 
-function renderOrders() {
+async function renderOrders() {
   const uid = getUserId();
   const list = document.getElementById("orders-list");
   const empty = document.getElementById("orders-empty");
   const countBadge = document.getElementById("orders-count");
 
-  const orders = getOrders(uid).sort((a, b) => b.id - a.id); // newest first
-  countBadge.textContent = orders.length;
+  // order_items(*) pulls each order's line items in the same request,
+  // via the order_items.order_id -> orders.id foreign key.
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select("*, order_items(*)")
+    .eq("user_id", uid)
+    .order("id", { ascending: false }); // newest first
 
-  const filtered = orders.filter((o) => {
+  if (error) {
+    console.error("Failed to load orders:", error);
+    list.innerHTML = "";
+    empty.hidden = false;
+    empty.textContent = "Couldn't load your orders (" + error.message + ").";
+    countBadge.textContent = "0";
+    return;
+  }
+
+  cachedOrders = orders || [];
+  countBadge.textContent = cachedOrders.length;
+
+  const filtered = cachedOrders.filter((o) => {
     if (currentOrderFilter === "all") return true;
     if (currentOrderFilter === "cancelled") return o.status === "Cancelled";
     if (currentOrderFilter === "not-shipped") return o.status !== "Cancelled" && o.status !== "Delivered";
@@ -342,14 +355,15 @@ function renderOrders() {
 
   if (filtered.length === 0) {
     empty.hidden = false;
+    empty.textContent = "No orders here yet. When you place an order, it'll show up in this list.";
     return;
   }
   empty.hidden = true;
 
   filtered.forEach((order) => {
     const meta = statusMeta(order.status);
-    const total = order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const canCancel = order.status !== "Cancelled" && order.status !== "Delivered";
+    const placedDate = new Date(order.created_at).toLocaleDateString();
 
     const card = document.createElement("div");
     card.className = "order-card";
@@ -357,15 +371,15 @@ function renderOrders() {
       <div class="order-card-head">
         <div class="order-card-head-field">
           <span class="label">Order placed</span>
-          <strong>${order.date}</strong>
+          <strong>${placedDate}</strong>
         </div>
         <div class="order-card-head-field">
           <span class="label">Total</span>
-          <strong>₱${total.toFixed(2)}</strong>
+          <strong>₱${Number(order.total).toFixed(2)}</strong>
         </div>
         <div class="order-card-head-field">
           <span class="label">Ship to</span>
-          <strong>${order.delivery?.name || "—"}</strong>
+          <strong>${order.ship_name || "—"}</strong>
         </div>
         <div class="order-card-id">Order #${order.id}</div>
       </div>
@@ -375,19 +389,19 @@ function renderOrders() {
       </div>
 
       ${
-        order.status === "Cancelled" && order.cancelReason
-          ? `<div class="order-status-note">Cancelled${order.cancelledAt ? " on " + order.cancelledAt : ""} · Reason: ${order.cancelReason}</div>`
+        order.status === "Cancelled" && order.cancel_reason
+          ? `<div class="order-status-note">Cancelled${order.cancelled_at ? " on " + new Date(order.cancelled_at).toLocaleDateString() : ""} · Reason: ${order.cancel_reason}</div>`
           : ""
       }
 
-      ${order.items
+      ${(order.order_items || [])
         .map(
           (item) => `
         <div class="order-item-row">
-          <img src="${item.image}" alt="${item.name}">
+          <img src="${item.product_image}" alt="${item.product_name}">
           <div class="order-item-details">
-            <p class="order-item-name">${item.name}</p>
-            <p class="order-item-qty">Qty: ${item.quantity} · ₱${item.price.toFixed(2)} each</p>
+            <p class="order-item-name">${item.product_name}</p>
+            <p class="order-item-qty">Qty: ${item.quantity} · ₱${Number(item.unit_price).toFixed(2)} each</p>
           </div>
           <div class="order-item-actions">
             <button class="btn-outline buy-again" data-order-id="${order.id}" data-item-id="${item.id}">Buy it again</button>
@@ -417,24 +431,29 @@ document.getElementById("orders-list").addEventListener("click", (e) => {
   const cancelBtn = e.target.closest(".cancel-order");
 
   if (buyBtn) {
-    const uid = getUserId();
-    const order = getOrders(uid).find((o) => o.id == buyBtn.dataset.orderId);
-    const item = order?.items.find((i) => i.id == buyBtn.dataset.itemId);
+    const order = cachedOrders.find((o) => o.id == buyBtn.dataset.orderId);
+    const item = order?.order_items.find((i) => i.id == buyBtn.dataset.itemId);
     if (!item) return;
 
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const existing = cart.find((c) => c.id === item.id);
+    const existing = cart.find((c) => c.id === item.product_id);
     if (existing) {
       existing.quantity += item.quantity;
     } else {
-      cart.push({ ...item });
+      cart.push({
+        id: item.product_id,
+        name: item.product_name,
+        price: item.unit_price,
+        image: item.product_image,
+        quantity: item.quantity,
+      });
     }
     localStorage.setItem("cart", JSON.stringify(cart));
 
     if (window.emieReact) {
-      window.emieReact("assets/gifs/kilig_emie.gif", `Added ${item.name} back to your cart!`, 2200);
+      window.emieReact("assets/gifs/kilig_emie.gif", `Added ${item.product_name} back to your cart!`, 2200);
     } else {
-      alert(`Added ${item.name} back to your cart.`);
+      alert(`Added ${item.product_name} back to your cart.`);
     }
   }
 
@@ -451,7 +470,7 @@ document.getElementById("cancel-modal-close").addEventListener("click", () => {
   document.getElementById("cancel-order-modal").classList.remove("active");
 });
 
-document.getElementById("cancel-modal-confirm").addEventListener("click", () => {
+document.getElementById("cancel-modal-confirm").addEventListener("click", async () => {
   const modal = document.getElementById("cancel-order-modal");
   const orderId = modal.dataset.orderId;
   const reasonSelect = document.getElementById("cancel-reason-select").value;
@@ -462,13 +481,24 @@ document.getElementById("cancel-modal-confirm").addEventListener("click", () => 
     return;
   }
 
-  const all = JSON.parse(localStorage.getItem("orders")) || [];
-  const order = all.find((o) => o.id == orderId);
-  if (order) {
-    order.status = "Cancelled";
-    order.cancelReason = reasonText ? `${reasonSelect} — ${reasonText}` : reasonSelect;
-    order.cancelledAt = new Date().toLocaleDateString();
-    saveAllOrders(all);
+  const confirmBtn = document.getElementById("cancel-modal-confirm");
+  confirmBtn.disabled = true;
+
+  const { error } = await supabase
+    .from("orders")
+    .update({
+      status: "Cancelled",
+      cancel_reason: reasonText ? `${reasonSelect} — ${reasonText}` : reasonSelect,
+      cancelled_at: new Date().toISOString(),
+    })
+    .eq("id", orderId);
+
+  confirmBtn.disabled = false;
+
+  if (error) {
+    console.error("Cancel order failed:", error);
+    alert("Couldn't cancel this order: " + error.message);
+    return;
   }
 
   modal.classList.remove("active");
