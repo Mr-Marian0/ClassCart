@@ -1,3 +1,14 @@
+import { supabase } from "./supabaseClient.js";
+
+// Require login before allowing checkout
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+
+if (!user) {
+  window.location.href = "account.html";
+}
+
 // Load cart items into checkout summary
 function loadCheckoutSummary() {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -33,7 +44,9 @@ function loadCheckoutSummary() {
 }
 
 // Place order
-document.getElementById("place-order-btn").addEventListener("click", () => {
+const placeOrderBtn = document.getElementById("place-order-btn");
+
+placeOrderBtn.addEventListener("click", async () => {
   const name = document.getElementById("checkout-name").value.trim();
   const address = document.getElementById("checkout-address").value.trim();
   const city = document.getElementById("checkout-city").value.trim();
@@ -54,20 +67,57 @@ document.getElementById("place-order-btn").addEventListener("click", () => {
     return;
   }
 
-  const order = {
-    id: Date.now(),
-    userId: localStorage.getItem("ccUserId") || null,
-    items: cart,
-    delivery: { name, address, city, province, zip, country },
-    payment: payment,
-    status: "Processing",
-    date: new Date().toLocaleDateString(),
-  };
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Save order
-  const orders = JSON.parse(localStorage.getItem("orders")) || [];
-  orders.push(order);
-  localStorage.setItem("orders", JSON.stringify(orders));
+  placeOrderBtn.disabled = true;
+  placeOrderBtn.textContent = "Placing order...";
+
+  // 1. Insert the order header
+  const { data: order, error: orderError } = await supabase
+    .from("orders")
+    .insert({
+      user_id: user.id,
+      ship_name: name,
+      ship_address: address,
+      ship_city: city,
+      ship_province: province,
+      ship_zip: zip,
+      ship_country: country,
+      payment_method: payment,
+      subtotal: subtotal,
+      total: subtotal,
+      status: "Processing",
+    })
+    .select()
+    .single();
+
+  if (orderError || !order) {
+    console.error("Order insert failed:", orderError);
+    alert("Something went wrong placing your order: " + (orderError?.message || "unknown error"));
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = "Place Order";
+    return;
+  }
+
+  // 2. Insert one row per cart item, linked to the new order
+  const orderItems = cart.map((item) => ({
+    order_id: order.id,
+    product_id: item.id,
+    product_name: item.name,
+    product_image: item.image,
+    unit_price: item.price,
+    quantity: item.quantity,
+  }));
+
+  const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
+
+  if (itemsError) {
+    console.error("Order items insert failed:", itemsError);
+    alert("Your order was created, but saving the items failed: " + itemsError.message);
+    placeOrderBtn.disabled = false;
+    placeOrderBtn.textContent = "Place Order";
+    return;
+  }
 
   // Clear cart
   localStorage.removeItem("cart");
@@ -90,6 +140,9 @@ document.getElementById("place-order-btn").addEventListener("click", () => {
 
   // Show modal
   document.getElementById("order-modal").classList.add("active");
+
+  placeOrderBtn.disabled = false;
+  placeOrderBtn.textContent = "Place Order";
 });
 
 // Continue shopping
