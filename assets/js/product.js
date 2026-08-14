@@ -7,6 +7,7 @@ const productId = parseInt(params.get("id"));
 supabase.from("products")
   .select("*")
   .eq("id", productId)
+  .eq("is_active", true)
   .single()
   .then(({ data: product, error }) => {
     if (error || !product) {

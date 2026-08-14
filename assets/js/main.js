@@ -5,6 +5,7 @@ import { supabase } from "./supabaseClient.js";
 supabase
   .from("products")
   .select("*")
+  .eq("is_active", true)
   .then(({ data: products, error }) => {
     if (error) {
       console.error("Error loading products:", error);

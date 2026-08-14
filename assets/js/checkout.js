@@ -113,7 +113,16 @@ placeOrderBtn.addEventListener("click", async () => {
 
   if (itemsError) {
     console.error("Order items insert failed:", itemsError);
-    alert("Your order was created, but saving the items failed: " + itemsError.message);
+
+    // Roll back the order header we just created — otherwise it's left
+    // behind as an empty "Processing" order that never really happened.
+    await supabase.from("orders").delete().eq("id", order.id);
+
+    const friendlyMessage = itemsError.message.includes("insufficient_stock")
+      ? "Sorry, one of the items in your cart just sold out or dropped in stock. Please update your cart and try again."
+      : "Something went wrong saving your order items: " + itemsError.message;
+
+    alert(friendlyMessage);
     placeOrderBtn.disabled = false;
     placeOrderBtn.textContent = "Place Order";
     return;

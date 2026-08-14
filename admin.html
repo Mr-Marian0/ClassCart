@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin - ClassCart</title>
+    <link rel="stylesheet" href="assets/css/admin.css" />
+  </head>
+  <body>
+    <!-- Gate shown while we check the session / is_admin flag -->
+    <div class="admin-gate" id="admin-gate">
+      <p>Checking access…</p>
+    </div>
+
+    <div class="admin-shell is-hidden" id="admin-shell">
+      <!-- Top nav -->
+      <header class="admin-topbar">
+        <a href="index.html" class="admin-logo">
+          <img src="assets/images/static_emie.png" alt="Emie" />
+          <span>Class<span class="accent">Cart</span> <span class="admin-tag">Admin</span></span>
+        </a>
+
+        <nav class="admin-tabs" aria-label="Admin sections">
+          <button class="admin-tab active" data-panel="overview" type="button">Overview</button>
+          <button class="admin-tab" data-panel="orders" type="button">Orders</button>
+          <button class="admin-tab" data-panel="products" type="button">Products</button>
+          <button class="admin-tab" data-panel="customers" type="button">Customers</button>
+        </nav>
+
+        <div class="admin-topbar-right">
+          <span class="admin-whoami" id="admin-whoami"></span>
+          <button class="admin-logout" id="admin-logout" type="button">Log Out</button>
+        </div>
+      </header>
+
+      <main class="admin-content">
+        <!-- ===== OVERVIEW ===== -->
+        <section class="admin-panel active" id="panel-overview">
+          <h1>Overview</h1>
+          <div class="stat-grid" id="stat-grid">
+            <div class="stat-card">
+              <span class="stat-label">Total Orders</span>
+              <span class="stat-value" id="stat-total-orders">—</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Revenue</span>
+              <span class="stat-value" id="stat-revenue">—</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Processing</span>
+              <span class="stat-value" id="stat-processing">—</span>
+            </div>
+            <div class="stat-card warn">
+              <span class="stat-label">Low Stock (&lt;10)</span>
+              <span class="stat-value" id="stat-low-stock">—</span>
+            </div>
+          </div>
+
+          <h2 class="admin-subheading">Recent Orders</h2>
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="recent-orders-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="recent-orders-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ===== ORDERS ===== -->
+        <section class="admin-panel" id="panel-orders">
+          <div class="panel-head">
+            <h1>Orders</h1>
+            <div class="orders-filter">
+              <select id="order-status-filter">
+                <option value="all">All statuses</option>
+                <option value="Processing">Processing</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="orders-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Order</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Ship To</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="orders-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-state is-hidden" id="orders-empty">No orders match this filter.</p>
+        </section>
+
+        <!-- ===== PRODUCTS ===== -->
+        <section class="admin-panel" id="panel-products">
+          <div class="panel-head">
+            <h1>Products</h1>
+            <button class="btn-primary-sm" id="add-product-btn" type="button">+ Add Product</button>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="products-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Active</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="products-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-state is-hidden" id="products-empty">No products yet. Add your first one above.</p>
+        </section>
+
+        <!-- ===== CUSTOMERS ===== -->
+        <section class="admin-panel" id="panel-customers">
+          <h1>Customers</h1>
+          <p class="admin-note">Email addresses aren't visible here — Supabase keeps those in a protected auth table that only server-side code can read.</p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="customers-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Orders Placed</th>
+                  <th>Total Spent</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody id="customers-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-state is-hidden" id="customers-empty">No customers yet.</p>
+        </section>
+      </main>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Add / Edit Product -->
+    <div class="cc-modal" id="product-modal">
+      <div class="cc-modal-box">
+        <h3 id="product-modal-title">Add Product</h3>
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label for="prod-name">Name</label>
+            <input type="text" id="prod-name" placeholder="Glue Stick Set" />
+          </div>
+          <div class="form-group">
+            <label for="prod-category">Category</label>
+            <input type="text" id="prod-category" placeholder="Art Supplies" />
+          </div>
+          <div class="form-group">
+            <label for="prod-price">Price (₱)</label>
+            <input type="number" id="prod-price" min="0" step="0.01" placeholder="150.00" />
+          </div>
+          <div class="form-group">
+            <label for="prod-stock">Stock</label>
+            <input type="number" id="prod-stock" min="0" step="1" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label class="cc-checkbox-row" style="margin-top: 1.6rem;">
+              <input type="checkbox" id="prod-active" checked />
+              <span>Active (visible in shop)</span>
+            </label>
+          </div>
+          <div class="form-group span-2">
+            <label for="prod-sample-image">Main Image URL</label>
+            <input type="text" id="prod-sample-image" placeholder="assets/images/products/glue-stick.jpg" />
+          </div>
+          <div class="form-group span-2">
+            <label for="prod-additional-images">Additional Image URLs (comma-separated, optional)</label>
+            <input type="text" id="prod-additional-images" placeholder="img1.jpg, img2.jpg" />
+          </div>
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="product-modal-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="product-modal-save" type="button">Save Product</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="assets/js/admin.js"></script>
+  </body>
+</html>

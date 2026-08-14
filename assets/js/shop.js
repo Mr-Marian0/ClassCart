@@ -15,10 +15,12 @@ let filters = {
   sort: 'newest'
 };
 
-// Fetch products
+// Fetch products (customers only see active/in-stock-tracked products;
+// admins manage visibility via the is_active toggle in admin.html)
 supabase
   .from("products")
   .select("*")
+  .eq("is_active", true)
   .then(({ data: products, error }) => {
     if (error) {
       console.error("Error loading products:", error);

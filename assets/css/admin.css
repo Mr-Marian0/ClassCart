@@ -1,0 +1,530 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --cc-yellow:  #FFD93D;
+  --cc-ink:     #111827;
+  --cc-paper:   #F5F7FA;
+  --cc-leaf:    #22C55E;
+  --cc-slate:   #6B7280;
+  --cc-white:   #FFFFFF;
+  --cc-border:  #E5E7EB;
+  --cc-radius:  8px;
+  --cc-danger:  #EF4444;
+  --cc-amber:   #F59E0B;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--cc-paper);
+  color: var(--cc-ink);
+}
+
+/* ─────────────────────────────────────────
+   GATE (loading state before is_admin check resolves)
+───────────────────────────────────────── */
+.admin-gate {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cc-slate);
+  font-size: 1rem;
+}
+
+/* ─────────────────────────────────────────
+   TOP BAR
+───────────────────────────────────────── */
+.admin-topbar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.9rem 1.75rem;
+  background: var(--cc-ink);
+  color: var(--cc-white);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.admin-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--cc-white);
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.admin-logo img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-logo .accent { color: var(--cc-yellow); }
+
+.admin-tag {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  padding: 0.15rem 0.45rem;
+  border-radius: 5px;
+  margin-left: 0.25rem;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.admin-tab {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-tab:hover { color: var(--cc-white); background: rgba(255, 255, 255, 0.08); }
+
+.admin-tab.active {
+  color: var(--cc-ink);
+  background: var(--cc-yellow);
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  white-space: nowrap;
+}
+
+.admin-whoami {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.admin-logout {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: var(--cc-white);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-logout:hover { background: rgba(255, 255, 255, 0.12); }
+
+/* ─────────────────────────────────────────
+   CONTENT
+───────────────────────────────────────── */
+.admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.75rem 4rem;
+}
+
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.admin-panel h1 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  margin: 0 0 1.25rem;
+}
+
+.admin-subheading {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin: 2.25rem 0 1rem;
+}
+
+.admin-note {
+  color: var(--cc-slate);
+  font-size: 0.85rem;
+  margin: -0.75rem 0 1.25rem;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.panel-head h1 { margin: 0; }
+
+/* ─────────────────────────────────────────
+   STAT CARDS
+───────────────────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-card {
+  background: var(--cc-white);
+  border: 1px solid var(--cc-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.stat-card.warn {
+  border-color: var(--cc-amber);
+  background: #FFFBEB;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--cc-slate);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.7rem;
+  font-weight: 500;
+}
+
+/* ─────────────────────────────────────────
+   TABLES
+───────────────────────────────────────── */
+.admin-table-wrap {
+  background: var(--cc-white);
+  border: 1px solid var(--cc-border);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.admin-table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--cc-slate);
+  font-weight: 700;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--cc-border);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cc-border);
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:last-child td { border-bottom: none; }
+.admin-table tbody tr:hover { background: var(--cc-paper); }
+
+.admin-table .mono { font-family: 'DM Mono', monospace; }
+
+.admin-table img.thumb {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.order-items-row td {
+  background: var(--cc-paper);
+  padding: 0.75rem 1rem 1rem 2.5rem;
+}
+
+.order-items-row .item-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.83rem;
+  color: var(--cc-slate);
+  padding: 0.2rem 0;
+}
+
+.expand-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--cc-slate);
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  transition: transform 0.15s ease;
+}
+
+.expand-btn.open { transform: rotate(90deg); }
+
+/* ─────────────────────────────────────────
+   STATUS BADGES / SELECT
+───────────────────────────────────────── */
+.status-select {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 7px;
+  border: 1px solid var(--cc-border);
+  cursor: pointer;
+  background: var(--cc-white);
+}
+
+.status-select.st-processing { color: var(--cc-amber); border-color: var(--cc-amber); }
+.status-select.st-shipped { color: #3B82F6; border-color: #3B82F6; }
+.status-select.st-delivered { color: var(--cc-leaf); border-color: var(--cc-leaf); }
+.status-select.st-cancelled { color: var(--cc-danger); border-color: var(--cc-danger); }
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+}
+.status-badge.st-processing { color: var(--cc-amber); background: #FFFBEB; }
+.status-badge.st-shipped { color: #3B82F6; background: #EFF6FF; }
+.status-badge.st-delivered { color: var(--cc-leaf); background: #F0FDF4; }
+.status-badge.st-cancelled { color: var(--cc-danger); background: #FEF2F2; }
+
+.stock-low { color: var(--cc-danger); font-weight: 700; }
+
+/* ─────────────────────────────────────────
+   TOGGLES / SMALL CONTROLS
+───────────────────────────────────────── */
+.stock-input {
+  width: 64px;
+  font-family: 'DM Mono', monospace;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 21px;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--cc-border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  left: 3px;
+  top: 3px;
+  background: var(--cc-white);
+  border-radius: 50%;
+  transition: transform 0.15s ease;
+}
+.toggle-switch input:checked + .toggle-slider { background: var(--cc-leaf); }
+.toggle-switch input:checked + .toggle-slider::before { transform: translateX(17px); }
+
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  appearance: none;
+  border: 1px solid var(--cc-border);
+  background: var(--cc-white);
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+}
+.icon-btn:hover { background: var(--cc-paper); }
+.icon-btn.danger { color: var(--cc-danger); border-color: #FCA5A5; }
+.icon-btn.danger:hover { background: #FEF2F2; }
+
+.btn-primary-sm {
+  appearance: none;
+  border: none;
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-primary-sm:hover { filter: brightness(0.96); }
+
+.btn-outline {
+  appearance: none;
+  border: 1px solid var(--cc-border);
+  background: var(--cc-white);
+  color: var(--cc-ink);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-outline:hover { background: var(--cc-paper); }
+
+.empty-state {
+  text-align: center;
+  color: var(--cc-slate);
+  font-size: 0.95rem;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--cc-border);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+#order-status-filter {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 8px;
+  background: var(--cc-white);
+}
+
+/* ─────────────────────────────────────────
+   MODALS (matches account.css pattern)
+───────────────────────────────────────── */
+.cc-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+.cc-modal.active { display: flex; }
+
+.cc-modal-box {
+  background: var(--cc-white);
+  border-radius: 14px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.cc-modal-box h3 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  margin: 0 0 1.1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+.form-group.span-2 { grid-column: 1 / -1; }
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cc-slate);
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"] {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+}
+
+.cc-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.cc-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────────── */
+@media (max-width: 900px) {
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-topbar { flex-wrap: wrap; gap: 0.75rem; }
+  .admin-tabs { order: 3; width: 100%; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+  .stat-grid { grid-template-columns: 1fr; }
+  .admin-content { padding: 1.25rem 1rem 3rem; }
+}
+
+/* ─────────────────────────────────────────
+   UTILITY — I placed .is-hidden last so that it always
+   wins ties, no matter what other single-class display rule it's
+   fighting (this is what broke on #admin-gate).
+───────────────────────────────────────── */
+.is-hidden { display: none; }
