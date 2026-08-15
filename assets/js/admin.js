@@ -142,21 +142,71 @@ function renderOverview() {
 ───────────────────────────────────────── */
 const STATUS_OPTIONS = ["Processing", "Shipped", "Delivered", "Cancelled"];
 
+const PAGE_SIZE = 10;
+const pageState = { orders: 1, products: 1 };
+
+// Slices a filtered array to the current page for the given key, and
+// updates that panel's "Page X of Y" label + disables Prev/Next at the ends.
+function paginate(key, items) {
+  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  if (pageState[key] > totalPages) pageState[key] = totalPages;
+
+  document.getElementById(`${key}-page-num`).textContent = pageState[key];
+  document.getElementById(`${key}-page-total`).textContent = totalPages;
+
+  const wrap = document.getElementById(`${key}-pagination`);
+  wrap.querySelector(".page-prev").disabled = pageState[key] <= 1;
+  wrap.querySelector(".page-next").disabled = pageState[key] >= totalPages;
+
+  const start = (pageState[key] - 1) * PAGE_SIZE;
+  return items.slice(start, start + PAGE_SIZE);
+}
+
+document.querySelectorAll(".page-prev").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.target;
+    if (pageState[key] > 1) {
+      pageState[key]--;
+      key === "orders" ? renderOrders() : renderProducts();
+    }
+  });
+});
+
+document.querySelectorAll(".page-next").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const key = btn.dataset.target;
+    pageState[key]++;
+    key === "orders" ? renderOrders() : renderProducts();
+  });
+});
+
 function renderOrders() {
   const filter = document.getElementById("order-status-filter").value;
+  const search = document.getElementById("order-search").value.trim().toLowerCase();
   const body = document.getElementById("orders-body");
   const empty = document.getElementById("orders-empty");
 
-  const filtered = cachedOrders.filter((o) => filter === "all" || o.status === filter);
+  let filtered = cachedOrders.filter((o) => filter === "all" || o.status === filter);
+
+  if (search) {
+    filtered = filtered.filter(
+      (o) => String(o.id).includes(search) || profileName(o.user_id).toLowerCase().includes(search)
+    );
+  }
+
   body.innerHTML = "";
 
   if (filtered.length === 0) {
     empty.classList.remove("is-hidden");
+    document.getElementById("orders-pagination").classList.add("is-hidden");
     return;
   }
   empty.classList.add("is-hidden");
+  document.getElementById("orders-pagination").classList.remove("is-hidden");
 
-  filtered.forEach((order) => {
+  const pageItems = paginate("orders", filtered);
+
+  pageItems.forEach((order) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><button class="expand-btn" data-order-id="${order.id}" type="button">▸</button></td>
@@ -195,7 +245,14 @@ function renderOrders() {
   });
 }
 
-document.getElementById("order-status-filter").addEventListener("change", renderOrders);
+document.getElementById("order-status-filter").addEventListener("change", () => {
+  pageState.orders = 1;
+  renderOrders();
+});
+document.getElementById("order-search").addEventListener("input", () => {
+  pageState.orders = 1;
+  renderOrders();
+});
 
 document.getElementById("orders-body").addEventListener("click", (e) => {
   const expandBtn = e.target.closest(".expand-btn");
@@ -242,17 +299,30 @@ document.getElementById("orders-body").addEventListener("change", async (e) => {
    PRODUCTS
 ───────────────────────────────────────── */
 function renderProducts() {
+  const search = document.getElementById("product-search").value.trim().toLowerCase();
   const body = document.getElementById("products-body");
   const empty = document.getElementById("products-empty");
+
+  let filtered = cachedProducts;
+  if (search) {
+    filtered = filtered.filter(
+      (p) => p.name.toLowerCase().includes(search) || (p.category || "").toLowerCase().includes(search)
+    );
+  }
+
   body.innerHTML = "";
 
-  if (cachedProducts.length === 0) {
+  if (filtered.length === 0) {
     empty.classList.remove("is-hidden");
+    document.getElementById("products-pagination").classList.add("is-hidden");
     return;
   }
   empty.classList.add("is-hidden");
+  document.getElementById("products-pagination").classList.remove("is-hidden");
 
-  cachedProducts.forEach((p) => {
+  const pageItems = paginate("products", filtered);
+
+  pageItems.forEach((p) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><img class="thumb" src="${p.sample_image || ""}" alt="${p.name}"></td>
@@ -347,6 +417,10 @@ function openProductModal(product) {
 }
 
 document.getElementById("add-product-btn").addEventListener("click", () => openProductModal(null));
+document.getElementById("product-search").addEventListener("input", () => {
+  pageState.products = 1;
+  renderProducts();
+});
 document.getElementById("product-modal-close").addEventListener("click", () => {
   document.getElementById("product-modal").classList.remove("active");
 });
@@ -406,17 +480,23 @@ document.getElementById("product-modal-save").addEventListener("click", async ()
    CUSTOMERS
 ───────────────────────────────────────── */
 function renderCustomers() {
+  const search = document.getElementById("customer-search").value.trim().toLowerCase();
   const body = document.getElementById("customers-body");
   const empty = document.getElementById("customers-empty");
+
+  const filtered = search
+    ? cachedProfiles.filter((p) => p.name.toLowerCase().includes(search))
+    : cachedProfiles;
+
   body.innerHTML = "";
 
-  if (cachedProfiles.length === 0) {
+  if (filtered.length === 0) {
     empty.classList.remove("is-hidden");
     return;
   }
   empty.classList.add("is-hidden");
 
-  cachedProfiles.forEach((profile) => {
+  filtered.forEach((profile) => {
     const theirOrders = cachedOrders.filter((o) => o.user_id === profile.id);
     const spent = theirOrders
       .filter((o) => o.status !== "Cancelled")
@@ -432,6 +512,8 @@ function renderCustomers() {
     body.appendChild(tr);
   });
 }
+
+document.getElementById("customer-search").addEventListener("input", renderCustomers);
 
 /* ─────────────────────────────────────────
    INIT

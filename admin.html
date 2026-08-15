@@ -78,6 +78,7 @@
           <div class="panel-head">
             <h1>Orders</h1>
             <div class="orders-filter">
+              <input type="text" id="order-search" placeholder="Search order # or customer name…" class="admin-search" />
               <select id="order-status-filter">
                 <option value="all">All statuses</option>
                 <option value="Processing">Processing</option>
@@ -105,13 +106,21 @@
             </table>
           </div>
           <p class="empty-state is-hidden" id="orders-empty">No orders match this filter.</p>
+          <div class="admin-pagination" id="orders-pagination">
+            <button class="icon-btn page-prev" data-target="orders" type="button">‹ Prev</button>
+            <span class="page-status">Page <span id="orders-page-num">1</span> of <span id="orders-page-total">1</span></span>
+            <button class="icon-btn page-next" data-target="orders" type="button">Next ›</button>
+          </div>
         </section>
 
         <!-- ===== PRODUCTS ===== -->
         <section class="admin-panel" id="panel-products">
           <div class="panel-head">
             <h1>Products</h1>
-            <button class="btn-primary-sm" id="add-product-btn" type="button">+ Add Product</button>
+            <div class="orders-filter">
+              <input type="text" id="product-search" placeholder="Search name or category…" class="admin-search" />
+              <button class="btn-primary-sm" id="add-product-btn" type="button">+ Add Product</button>
+            </div>
           </div>
 
           <div class="admin-table-wrap">
@@ -131,11 +140,19 @@
             </table>
           </div>
           <p class="empty-state is-hidden" id="products-empty">No products yet. Add your first one above.</p>
+          <div class="admin-pagination" id="products-pagination">
+            <button class="icon-btn page-prev" data-target="products" type="button">‹ Prev</button>
+            <span class="page-status">Page <span id="products-page-num">1</span> of <span id="products-page-total">1</span></span>
+            <button class="icon-btn page-next" data-target="products" type="button">Next ›</button>
+          </div>
         </section>
 
         <!-- ===== CUSTOMERS ===== -->
         <section class="admin-panel" id="panel-customers">
-          <h1>Customers</h1>
+          <div class="panel-head">
+            <h1>Customers</h1>
+            <input type="text" id="customer-search" placeholder="Search name…" class="admin-search" />
+          </div>
           <p class="admin-note">Email addresses aren't visible here — Supabase keeps those in a protected auth table that only server-side code can read.</p>
 
           <div class="admin-table-wrap">

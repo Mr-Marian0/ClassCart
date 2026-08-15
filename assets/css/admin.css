@@ -436,6 +436,42 @@ body {
   background: var(--cc-white);
 }
 
+.orders-filter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.admin-search {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 8px;
+  background: var(--cc-white);
+  min-width: 220px;
+}
+
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.page-status {
+  font-size: 0.85rem;
+  color: var(--cc-slate);
+  font-family: 'DM Mono', monospace;
+}
+
+.admin-pagination .icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* ─────────────────────────────────────────
    MODALS (matches account.css pattern)
 ───────────────────────────────────────── */
