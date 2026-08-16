@@ -402,6 +402,82 @@ document.getElementById("products-body").addEventListener("click", async (e) => 
   }
 });
 
+// Image state for the product modal — files picked but not yet uploaded,
+// plus already-saved URLs (when editing). Nothing actually uploads until Save.
+let pendingSampleFile = null;
+let currentSampleImageUrl = null;
+let pendingAdditionalFiles = [];
+let currentAdditionalImages = [];
+
+async function uploadProductImage(file) {
+  const ext = file.name.split(".").pop();
+  const path = `products/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await supabase.storage.from("product-images").upload(path, file);
+  if (error) throw error;
+  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function renderImagePreviews() {
+  const mainRow = document.getElementById("prod-sample-preview-row");
+  mainRow.innerHTML = "";
+  const mainSrc = pendingSampleFile ? URL.createObjectURL(pendingSampleFile) : currentSampleImageUrl;
+  if (mainSrc) {
+    mainRow.innerHTML = `
+      <div class="image-preview is-main">
+        <img src="${mainSrc}" alt="Main image">
+        <button class="remove-preview" data-kind="main" type="button">×</button>
+      </div>
+    `;
+  }
+
+  const addRow = document.getElementById("prod-additional-preview-row");
+  addRow.innerHTML = "";
+  currentAdditionalImages.forEach((url, i) => {
+    addRow.innerHTML += `
+      <div class="image-preview">
+        <img src="${url}" alt="Additional image ${i + 1}">
+        <button class="remove-preview" data-kind="existing-additional" data-index="${i}" type="button">×</button>
+      </div>
+    `;
+  });
+  pendingAdditionalFiles.forEach((file, i) => {
+    addRow.innerHTML += `
+      <div class="image-preview">
+        <img src="${URL.createObjectURL(file)}" alt="New image ${i + 1}">
+        <button class="remove-preview" data-kind="pending-additional" data-index="${i}" type="button">×</button>
+      </div>
+    `;
+  });
+}
+
+document.getElementById("prod-sample-image-file").addEventListener("change", (e) => {
+  pendingSampleFile = e.target.files[0] || null;
+  renderImagePreviews();
+});
+
+document.getElementById("prod-additional-images-file").addEventListener("change", (e) => {
+  pendingAdditionalFiles.push(...Array.from(e.target.files));
+  e.target.value = ""; // allows re-selecting the same file later if removed
+  renderImagePreviews();
+});
+
+document.getElementById("product-modal").addEventListener("click", (e) => {
+  const btn = e.target.closest(".remove-preview");
+  if (!btn) return;
+
+  if (btn.dataset.kind === "main") {
+    pendingSampleFile = null;
+    currentSampleImageUrl = null;
+    document.getElementById("prod-sample-image-file").value = "";
+  } else if (btn.dataset.kind === "existing-additional") {
+    currentAdditionalImages.splice(Number(btn.dataset.index), 1);
+  } else if (btn.dataset.kind === "pending-additional") {
+    pendingAdditionalFiles.splice(Number(btn.dataset.index), 1);
+  }
+  renderImagePreviews();
+});
+
 function openProductModal(product) {
   const modal = document.getElementById("product-modal");
   modal.dataset.editId = product ? product.id : "";
@@ -411,8 +487,15 @@ function openProductModal(product) {
   document.getElementById("prod-price").value = product?.price ?? "";
   document.getElementById("prod-stock").value = product?.stock ?? 0;
   document.getElementById("prod-active").checked = product ? !!product.is_active : true;
-  document.getElementById("prod-sample-image").value = product?.sample_image || "";
-  document.getElementById("prod-additional-images").value = (product?.additional_images || []).join(", ");
+
+  pendingSampleFile = null;
+  currentSampleImageUrl = product?.sample_image || null;
+  pendingAdditionalFiles = [];
+  currentAdditionalImages = [...(product?.additional_images || [])];
+  document.getElementById("prod-sample-image-file").value = "";
+  document.getElementById("prod-additional-images-file").value = "";
+  renderImagePreviews();
+
   modal.classList.add("active");
 }
 
@@ -434,46 +517,55 @@ document.getElementById("product-modal-save").addEventListener("click", async ()
   const price = parseFloat(document.getElementById("prod-price").value);
   const stock = parseInt(document.getElementById("prod-stock").value, 10) || 0;
   const isActive = document.getElementById("prod-active").checked;
-  const sampleImage = document.getElementById("prod-sample-image").value.trim();
-  const additionalImages = document
-    .getElementById("prod-additional-images")
-    .value.split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
 
-  if (!name || !category || isNaN(price) || !sampleImage) {
-    alert("Please fill in name, category, price, and a main image URL.");
+  if (!name || !category || isNaN(price) || (!pendingSampleFile && !currentSampleImageUrl)) {
+    alert("Please fill in name, category, price, and a main image.");
     return;
   }
-
-  const row = {
-    name,
-    category,
-    price,
-    stock,
-    is_active: isActive,
-    sample_image: sampleImage,
-    additional_images: additionalImages,
-  };
 
   const saveBtn = document.getElementById("product-modal-save");
   saveBtn.disabled = true;
 
-  const { error } = editId
-    ? await supabase.from("products").update(row).eq("id", editId)
-    : await supabase.from("products").insert(row);
+  try {
+    saveBtn.textContent = "Uploading images…";
 
-  saveBtn.disabled = false;
+    const sampleImageUrl = pendingSampleFile ? await uploadProductImage(pendingSampleFile) : currentSampleImageUrl;
 
-  if (error) {
-    alert("Couldn't save this product: " + error.message);
-    return;
+    const uploadedAdditional = [];
+    for (const file of pendingAdditionalFiles) {
+      uploadedAdditional.push(await uploadProductImage(file));
+    }
+    const finalAdditionalImages = [...currentAdditionalImages, ...uploadedAdditional];
+
+    const row = {
+      name,
+      category,
+      price,
+      stock,
+      is_active: isActive,
+      sample_image: sampleImageUrl,
+      additional_images: finalAdditionalImages,
+    };
+
+    saveBtn.textContent = "Saving…";
+
+    const { error } = editId
+      ? await supabase.from("products").update(row).eq("id", editId)
+      : await supabase.from("products").insert(row);
+
+    if (error) throw error;
+
+    modal.classList.remove("active");
+    await loadProducts();
+    renderOverview();
+    renderProducts();
+  } catch (err) {
+    console.error("Failed to save product:", err);
+    alert("Couldn't save this product: " + err.message);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Product";
   }
-
-  modal.classList.remove("active");
-  await loadProducts();
-  renderOverview();
-  renderProducts();
 });
 
 /* ─────────────────────────────────────────

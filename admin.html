@@ -203,12 +203,14 @@
             </label>
           </div>
           <div class="form-group span-2">
-            <label for="prod-sample-image">Main Image URL</label>
-            <input type="text" id="prod-sample-image" placeholder="assets/images/products/glue-stick.jpg" />
+            <label for="prod-sample-image-file">Main Image</label>
+            <input type="file" id="prod-sample-image-file" accept="image/*" />
+            <div class="image-preview-row" id="prod-sample-preview-row"></div>
           </div>
           <div class="form-group span-2">
-            <label for="prod-additional-images">Additional Image URLs (comma-separated, optional)</label>
-            <input type="text" id="prod-additional-images" placeholder="img1.jpg, img2.jpg" />
+            <label for="prod-additional-images-file">Additional Images (optional, can select multiple)</label>
+            <input type="file" id="prod-additional-images-file" accept="image/*" multiple />
+            <div class="image-preview-row" id="prod-additional-preview-row"></div>
           </div>
         </div>
         <div class="cc-modal-actions">
