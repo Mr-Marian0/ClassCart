@@ -408,6 +408,7 @@ let pendingSampleFile = null;
 let currentSampleImageUrl = null;
 let pendingAdditionalFiles = [];
 let currentAdditionalImages = [];
+let currentTags = [];
 
 async function uploadProductImage(file) {
   const ext = file.name.split(".").pop();
@@ -450,6 +451,48 @@ function renderImagePreviews() {
     `;
   });
 }
+
+function renderTagChips() {
+  const row = document.getElementById("prod-tags-preview-row");
+  row.innerHTML = currentTags
+    .map(
+      (tag, i) => `
+    <span class="tag-chip">
+      ${tag}
+      <button data-index="${i}" type="button" aria-label="Remove tag">×</button>
+    </span>
+  `
+    )
+    .join("");
+}
+
+document.getElementById("prod-tags-insert").addEventListener("click", () => {
+  const input = document.getElementById("prod-tags-input");
+  const newTags = input.value
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .filter((t) => !currentTags.includes(t)); // skip exact duplicates
+
+  currentTags.push(...newTags);
+  input.value = "";
+  renderTagChips();
+});
+
+// Enter key in the tags input also inserts, so admins don't have to reach for the mouse
+document.getElementById("prod-tags-input").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("prod-tags-insert").click();
+  }
+});
+
+document.getElementById("prod-tags-preview-row").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-index]");
+  if (!btn) return;
+  currentTags.splice(Number(btn.dataset.index), 1);
+  renderTagChips();
+});
 
 document.getElementById("prod-sample-image-file").addEventListener("change", (e) => {
   pendingSampleFile = e.target.files[0] || null;
@@ -495,6 +538,10 @@ function openProductModal(product) {
   document.getElementById("prod-sample-image-file").value = "";
   document.getElementById("prod-additional-images-file").value = "";
   renderImagePreviews();
+
+  currentTags = [...(product?.tags || [])];
+  document.getElementById("prod-tags-input").value = "";
+  renderTagChips();
 
   modal.classList.add("active");
 }
@@ -545,6 +592,7 @@ document.getElementById("product-modal-save").addEventListener("click", async ()
       is_active: isActive,
       sample_image: sampleImageUrl,
       additional_images: finalAdditionalImages,
+      tags: currentTags,
     };
 
     saveBtn.textContent = "Saving…";

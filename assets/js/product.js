@@ -44,6 +44,8 @@ supabase.from("products")
       .join("");
 
     // Thumbnail click sliding
+    let currentImageIndex = 0;
+
     document.querySelectorAll(".img-item img").forEach((img) => {
       img.addEventListener("click", (e) => {
         e.preventDefault();
@@ -53,10 +55,85 @@ supabase.from("products")
         img.classList.add("active");
         
         const imgId = img.dataset.id;
+        currentImageIndex = Number(imgId);
         const displayWidth = document.querySelector(".img-showcase img:first-child").clientWidth;
         document.querySelector(".img-showcase").style.transform =
           `translateX(${-(imgId) * displayWidth}px)`;
       });
+    });
+
+    // ── Tags/keywords ──
+    const tagsContainer = document.getElementById("product-tags");
+    tagsContainer.innerHTML = (product.tags || [])
+      .map((tag) => `<span class="product-tag">${tag}</span>`)
+      .join("");
+
+    // ── Image zoom lightbox ──
+    const lightbox = document.getElementById("img-lightbox");
+    const lightboxImg = document.getElementById("lightbox-img");
+    const lightboxPrev = document.getElementById("lightbox-prev");
+    const lightboxNext = document.getElementById("lightbox-next");
+
+    function openLightbox(index) {
+      currentImageIndex = index;
+      lightboxImg.src = allImages[currentImageIndex];
+      lightboxImg.classList.remove("zoomed");
+      lightboxImg.style.transform = "scale(1)";
+      lightboxPrev.disabled = currentImageIndex === 0;
+      lightboxNext.disabled = currentImageIndex === allImages.length - 1;
+      lightbox.classList.add("active");
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("active");
+      lightboxImg.classList.remove("zoomed");
+      lightboxImg.style.transform = "scale(1)";
+    }
+
+    document.getElementById("img-zoom-hint").addEventListener("click", () => openLightbox(currentImageIndex));
+    document.querySelector(".img-showcase").addEventListener("click", () => openLightbox(currentImageIndex));
+
+    document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox(); // click outside the image
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!lightbox.classList.contains("active")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft" && !lightboxPrev.disabled) showLightboxImage(currentImageIndex - 1);
+      if (e.key === "ArrowRight" && !lightboxNext.disabled) showLightboxImage(currentImageIndex + 1);
+    });
+
+    function showLightboxImage(index) {
+      if (index < 0 || index >= allImages.length) return;
+      currentImageIndex = index;
+      lightboxImg.classList.remove("zoomed");
+      lightboxImg.style.transform = "scale(1)";
+      lightboxImg.src = allImages[currentImageIndex];
+      lightboxPrev.disabled = currentImageIndex === 0;
+      lightboxNext.disabled = currentImageIndex === allImages.length - 1;
+    }
+
+    lightboxPrev.addEventListener("click", () => showLightboxImage(currentImageIndex - 1));
+    lightboxNext.addEventListener("click", () => showLightboxImage(currentImageIndex + 1));
+
+    // Click the image itself to toggle zoom, centered on click position
+    lightboxImg.addEventListener("click", (e) => {
+      const isZoomed = lightboxImg.classList.contains("zoomed");
+
+      if (isZoomed) {
+        lightboxImg.classList.remove("zoomed");
+        lightboxImg.style.transform = "scale(1)";
+        return;
+      }
+
+      const rect = lightboxImg.getBoundingClientRect();
+      const originX = ((e.clientX - rect.left) / rect.width) * 100;
+      const originY = ((e.clientY - rect.top) / rect.height) * 100;
+      lightboxImg.style.transformOrigin = `${originX}% ${originY}%`;
+      lightboxImg.classList.add("zoomed");
+      lightboxImg.style.transform = "scale(2.2)";
     });
 
     // Add to cart button

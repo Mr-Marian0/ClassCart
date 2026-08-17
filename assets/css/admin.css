@@ -589,6 +589,53 @@ body {
   padding: 0.1rem 0;
 }
 
+.tags-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.tags-input-row input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--cc-border);
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9rem;
+}
+
+.tag-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.tag-chip-row:empty { margin-top: 0; }
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--cc-paper);
+  border: 1px solid var(--cc-border);
+  color: var(--cc-ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 10%;
+}
+
+.tag-chip button {
+  appearance: none;
+  border: none;
+  background: none;
+  color: var(--cc-danger);
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
 .cc-checkbox-row {
   display: flex;
   align-items: center;

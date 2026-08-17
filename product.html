@@ -19,8 +19,11 @@
         <div class="card">
           <!-- Left: Images -->
           <div class="product-imgs">
-            <div class="img-display">
+            <div class="img-display" id="img-display">
               <div class="img-showcase" id="img-showcase"></div>
+              <button class="img-zoom-hint" id="img-zoom-hint" type="button" aria-label="Zoom image">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+              </button>
             </div>
             <div class="img-select" id="img-select"></div>
           </div>
@@ -40,10 +43,11 @@
               <ul>
                 <li>Category: <span id="product-category">—</span></li>
                 <li>Availability: <span>In Stock</span></li>
-                <li>Shipping: <span>Nationwide</span></li>
                 <li>Shipping Fee: <span>Free</span></li>
               </ul>
             </div>
+
+            <div class="product-tags" id="product-tags"></div>
 
             <div class="purchase-info">
               <input type="number" id="product-quantity" min="1" max="100" value="1" />
@@ -56,6 +60,17 @@
         </div>
       </div>
     </main>
+
+    <!------------------------- Image Zoom Lightbox --------------------------->
+    <div class="img-lightbox" id="img-lightbox">
+      <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close">×</button>
+      <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous image">‹</button>
+      <div class="lightbox-image-wrap" id="lightbox-image-wrap">
+        <img id="lightbox-img" src="" alt="" />
+      </div>
+      <button class="lightbox-nav lightbox-next" id="lightbox-next" type="button" aria-label="Next image">›</button>
+      <p class="lightbox-hint">Click image to zoom in/out</p>
+    </div>
 
     <!------------------------- Footer Placeholder --------------------------->
     <div class="footer" id="footer-placeholder"></div>
