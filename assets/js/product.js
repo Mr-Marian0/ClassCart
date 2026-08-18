@@ -9,7 +9,7 @@ supabase.from("products")
   .eq("id", productId)
   .eq("is_active", true)
   .single()
-  .then(({ data: product, error }) => {
+  .then(async ({ data: product, error }) => {
     if (error || !product) {
       document.getElementById("product-title").textContent = "Product not found";
       return;
@@ -260,7 +260,188 @@ supabase.from("products")
 
       await refreshWishlistBtn();
     });
+
+    // ── Reviews ──
+    await initReviews(product.id);
   });
+
+async function initReviews(productId) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let myProfile = null;
+  if (user) {
+    const { data } = await supabase
+      .from("profile")
+      .select("is_review_banned")
+      .eq("id", user.id)
+      .maybeSingle();
+    myProfile = data;
+  }
+
+  const { data: reviews, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("product_id", productId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load reviews:", error);
+    return;
+  }
+
+  // Look up reviewer display names via the safe RPC (only exposes id+name)
+  const userIds = [...new Set(reviews.map((r) => r.user_id))];
+  let nameMap = {};
+  if (userIds.length > 0) {
+    const { data: names, error: nameError } = await supabase.rpc("get_reviewer_names", {
+      user_ids: userIds,
+    });
+    if (nameError) {
+      console.error("Failed to load reviewer names:", nameError);
+    } else {
+      nameMap = Object.fromEntries(names.map((n) => [n.id, n.name]));
+    }
+  }
+
+  renderReviewSummary(reviews);
+  renderReviewsList(reviews, nameMap);
+  renderReviewForm(productId, user, myProfile, reviews);
+}
+
+function starString(rating) {
+  const rounded = Math.round(rating);
+  return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+}
+
+function renderReviewSummary(reviews) {
+  const scoreEl = document.getElementById("reviews-avg-score");
+  const starsEl = document.getElementById("reviews-avg-stars");
+  const countEl = document.getElementById("reviews-count");
+
+  if (reviews.length === 0) {
+    scoreEl.textContent = "—";
+    starsEl.textContent = "";
+    countEl.textContent = "0 reviews";
+    return;
+  }
+
+  const avg = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  scoreEl.textContent = avg.toFixed(1);
+  starsEl.textContent = starString(avg);
+  countEl.textContent = `${reviews.length} review${reviews.length === 1 ? "" : "s"}`;
+}
+
+function renderReviewsList(reviews, nameMap) {
+  const list = document.getElementById("reviews-list");
+  const empty = document.getElementById("reviews-empty");
+  list.innerHTML = "";
+
+  if (reviews.length === 0) {
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+
+  reviews.forEach((r) => {
+    const card = document.createElement("div");
+    card.className = "review-card";
+    card.innerHTML = `
+      <div class="review-card-head">
+        <span class="review-author">${nameMap[r.user_id] || "Customer"}</span>
+        <span class="review-stars">${starString(r.rating)}</span>
+        <span class="review-date">${new Date(r.created_at).toLocaleDateString()}</span>
+      </div>
+      <p class="review-comment">${r.comment}</p>
+      ${
+        r.admin_response
+          ? `<div class="review-admin-response">
+               <span class="responder">Response from ClassCart</span>
+               <p>${r.admin_response}</p>
+             </div>`
+          : ""
+      }
+    `;
+    list.appendChild(card);
+  });
+}
+
+function renderReviewForm(productId, user, myProfile, reviews) {
+  const box = document.getElementById("review-form-box");
+
+  if (!user) {
+    box.innerHTML = `<p class="review-notice">Please <a href="account.html">log in</a> to leave a review.</p>`;
+    return;
+  }
+
+  if (myProfile?.is_review_banned) {
+    box.innerHTML = `<p class="review-notice">You're currently unable to post reviews on this account.</p>`;
+    return;
+  }
+
+  const alreadyReviewed = reviews.some((r) => r.user_id === user.id);
+  if (alreadyReviewed) {
+    box.innerHTML = `<p class="review-notice">You've already reviewed this product. Thanks for sharing your thoughts!</p>`;
+    return;
+  }
+
+  let selectedRating = 0;
+
+  box.innerHTML = `
+    <div class="star-picker" id="review-star-picker">
+      ${[1, 2, 3, 4, 5].map((n) => `<button type="button" data-value="${n}">★</button>`).join("")}
+    </div>
+    <textarea id="review-comment-input" placeholder="What did you think of this product?"></textarea>
+    <button type="button" class="btn" id="review-submit-btn">Submit Review</button>
+  `;
+
+  const stars = box.querySelectorAll(".star-picker button");
+  stars.forEach((star) => {
+    star.addEventListener("click", () => {
+      selectedRating = Number(star.dataset.value);
+      stars.forEach((s) => s.classList.toggle("filled", Number(s.dataset.value) <= selectedRating));
+    });
+  });
+
+  document.getElementById("review-submit-btn").addEventListener("click", async () => {
+    const comment = document.getElementById("review-comment-input").value.trim();
+
+    if (selectedRating === 0) {
+      alert("Please select a star rating.");
+      return;
+    }
+    if (!comment) {
+      alert("Please write a short comment.");
+      return;
+    }
+
+    const btn = document.getElementById("review-submit-btn");
+    btn.disabled = true;
+    btn.textContent = "Submitting…";
+
+    const { error } = await supabase.from("reviews").insert({
+      product_id: productId,
+      user_id: user.id,
+      rating: selectedRating,
+      comment,
+    });
+
+    if (error) {
+      console.error("Failed to submit review:", error);
+      alert("Couldn't submit your review: " + error.message);
+      btn.disabled = false;
+      btn.textContent = "Submit Review";
+      return;
+    }
+
+    if (window.emieReact) {
+      window.emieReact("assets/gifs/kilig_emie.gif", "Thanks for your review!", 2200);
+    }
+
+    await initReviews(productId);
+  });
+}
 
 // Handle window resize for image slider
 window.addEventListener("resize", () => {

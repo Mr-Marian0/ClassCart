@@ -25,6 +25,7 @@
           <button class="admin-tab" data-panel="orders" type="button">Orders</button>
           <button class="admin-tab" data-panel="products" type="button">Products</button>
           <button class="admin-tab" data-panel="customers" type="button">Customers</button>
+          <button class="admin-tab" data-panel="reviews" type="button">Reviews</button>
         </nav>
 
         <div class="admin-topbar-right">
@@ -163,12 +164,43 @@
                   <th>Orders Placed</th>
                   <th>Total Spent</th>
                   <th>Role</th>
+                  <th>Reviews</th>
                 </tr>
               </thead>
               <tbody id="customers-body"></tbody>
             </table>
           </div>
           <p class="empty-state is-hidden" id="customers-empty">No customers yet.</p>
+        </section>
+
+        <!-- ===== REVIEWS ===== -->
+        <section class="admin-panel" id="panel-reviews">
+          <div class="panel-head">
+            <h1>Reviews</h1>
+            <select id="review-status-filter">
+              <option value="all">All reviews</option>
+              <option value="visible">Visible only</option>
+              <option value="hidden">Hidden only</option>
+            </select>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table" id="reviews-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Customer</th>
+                  <th>Rating</th>
+                  <th>Comment</th>
+                  <th>Status</th>
+                  <th>Response</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="reviews-body"></tbody>
+            </table>
+          </div>
+          <p class="empty-state is-hidden" id="reviews-empty">No reviews yet.</p>
         </section>
       </main>
     </div>
@@ -224,6 +256,22 @@
         <div class="cc-modal-actions">
           <button class="btn-outline" id="product-modal-close" type="button">Cancel</button>
           <button class="btn-primary-sm" id="product-modal-save" type="button">Save Product</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Respond to Review -->
+    <div class="cc-modal" id="review-response-modal">
+      <div class="cc-modal-box">
+        <h3>Official Response</h3>
+        <p class="cc-modal-sub" id="review-response-context"></p>
+        <div class="form-group">
+          <label for="review-response-input">Your response (visible to everyone)</label>
+          <textarea id="review-response-input" rows="4" placeholder="Thanks for the feedback…"></textarea>
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="review-response-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="review-response-save" type="button">Save Response</button>
         </div>
       </div>
     </div>

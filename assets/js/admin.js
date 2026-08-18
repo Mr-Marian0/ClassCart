@@ -3,6 +3,7 @@ import { supabase } from "./supabaseClient.js";
 let cachedOrders = [];
 let cachedProducts = [];
 let cachedProfiles = [];
+let cachedReviews = [];
 
 /* ─────────────────────────────────────────
    ACCESS GATE
@@ -56,11 +57,12 @@ document.querySelectorAll(".admin-tab").forEach((tab) => {
    SHARED LOAD
 ───────────────────────────────────────── */
 async function loadEverything() {
-  await Promise.all([loadOrders(), loadProducts(), loadProfiles()]);
+  await Promise.all([loadOrders(), loadProducts(), loadProfiles(), loadReviews()]);
   renderOverview();
   renderOrders();
   renderProducts();
   renderCustomers();
+  renderReviews();
 }
 
 async function loadOrders() {
@@ -85,12 +87,26 @@ async function loadProducts() {
 }
 
 async function loadProfiles() {
-  const { data, error } = await supabase.from("profile").select("id, name, is_admin");
+  const { data, error } = await supabase.from("profile").select("id, name, is_admin, is_review_banned");
   if (error) {
     console.error("Failed to load profiles:", error);
     return;
   }
   cachedProfiles = data || [];
+}
+
+async function loadReviews() {
+  const { data, error } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+  if (error) {
+    console.error("Failed to load reviews:", error);
+    return;
+  }
+  cachedReviews = data || [];
+}
+
+function productName(productId) {
+  const p = cachedProducts.find((p) => p.id === productId);
+  return p ? p.name : "Unknown product";
 }
 
 function profileName(userId) {
@@ -648,12 +664,160 @@ function renderCustomers() {
       <td class="mono">${theirOrders.length}</td>
       <td class="mono">₱${spent.toFixed(2)}</td>
       <td>${profile.is_admin ? "Admin" : "Customer"}</td>
+      <td>
+        <label class="toggle-switch" title="${profile.is_review_banned ? "Blocked from posting reviews" : "Can post reviews"}">
+          <input type="checkbox" class="review-ban-toggle" data-profile-id="${profile.id}" ${!profile.is_review_banned ? "checked" : ""}>
+          <span class="toggle-slider"></span>
+        </label>
+      </td>
     `;
     body.appendChild(tr);
   });
 }
 
+document.getElementById("customers-body").addEventListener("change", async (e) => {
+  const toggle = e.target.closest(".review-ban-toggle");
+  if (!toggle) return;
+
+  const id = toggle.dataset.profileId;
+  const isReviewBanned = !toggle.checked; // toggle shows "can review", so unchecked = banned
+
+  const { error } = await supabase.from("profile").update({ is_review_banned: isReviewBanned }).eq("id", id);
+  if (error) {
+    alert("Couldn't update this customer's review access: " + error.message);
+    toggle.checked = !toggle.checked;
+    return;
+  }
+
+  await loadProfiles();
+  renderCustomers();
+});
+
 document.getElementById("customer-search").addEventListener("input", renderCustomers);
+
+/* ─────────────────────────────────────────
+   REVIEWS
+───────────────────────────────────────── */
+function renderReviews() {
+  const filter = document.getElementById("review-status-filter").value;
+  const body = document.getElementById("reviews-body");
+  const empty = document.getElementById("reviews-empty");
+
+  const filtered = cachedReviews.filter((r) => {
+    if (filter === "visible") return !r.is_hidden;
+    if (filter === "hidden") return r.is_hidden;
+    return true;
+  });
+
+  body.innerHTML = "";
+
+  if (filtered.length === 0) {
+    empty.classList.remove("is-hidden");
+    return;
+  }
+  empty.classList.add("is-hidden");
+
+  filtered.forEach((r) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${productName(r.product_id)}</td>
+      <td>${profileName(r.user_id)}</td>
+      <td class="review-stars-cell">${"★".repeat(r.rating)}${"☆".repeat(5 - r.rating)}</td>
+      <td class="review-comment-cell" title="${r.comment}">${r.comment}</td>
+      <td><span class="status-badge ${r.is_hidden ? "st-cancelled" : "st-delivered"}">${r.is_hidden ? "Hidden" : "Visible"}</span></td>
+      <td><span class="response-badge ${r.admin_response ? "yes" : "no"}">${r.admin_response ? "Responded" : "None"}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn respond-review" data-review-id="${r.id}" type="button">Respond</button>
+          <button class="icon-btn toggle-hide-review" data-review-id="${r.id}" type="button">${r.is_hidden ? "Unhide" : "Hide"}</button>
+          <button class="icon-btn danger delete-review" data-review-id="${r.id}" type="button">Delete</button>
+        </div>
+      </td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+document.getElementById("review-status-filter").addEventListener("change", renderReviews);
+
+document.getElementById("reviews-body").addEventListener("click", async (e) => {
+  const respondBtn = e.target.closest(".respond-review");
+  const hideBtn = e.target.closest(".toggle-hide-review");
+  const deleteBtn = e.target.closest(".delete-review");
+
+  if (respondBtn) {
+    const review = cachedReviews.find((r) => r.id == respondBtn.dataset.reviewId);
+    if (!review) return;
+
+    const modal = document.getElementById("review-response-modal");
+    modal.dataset.reviewId = review.id;
+    document.getElementById("review-response-context").textContent =
+      `${profileName(review.user_id)} on ${productName(review.product_id)}: "${review.comment}"`;
+    document.getElementById("review-response-input").value = review.admin_response || "";
+    modal.classList.add("active");
+  }
+
+  if (hideBtn) {
+    const review = cachedReviews.find((r) => r.id == hideBtn.dataset.reviewId);
+    if (!review) return;
+
+    const { error } = await supabase
+      .from("reviews")
+      .update({ is_hidden: !review.is_hidden })
+      .eq("id", review.id);
+
+    if (error) {
+      alert("Couldn't update this review: " + error.message);
+      return;
+    }
+    await loadReviews();
+    renderReviews();
+  }
+
+  if (deleteBtn) {
+    if (!confirm("Delete this review permanently?")) return;
+
+    const { error } = await supabase.from("reviews").delete().eq("id", deleteBtn.dataset.reviewId);
+    if (error) {
+      alert("Couldn't delete this review: " + error.message);
+      return;
+    }
+    await loadReviews();
+    renderReviews();
+  }
+});
+
+document.getElementById("review-response-close").addEventListener("click", () => {
+  document.getElementById("review-response-modal").classList.remove("active");
+});
+
+document.getElementById("review-response-save").addEventListener("click", async () => {
+  const modal = document.getElementById("review-response-modal");
+  const reviewId = modal.dataset.reviewId;
+  const response = document.getElementById("review-response-input").value.trim();
+
+  const saveBtn = document.getElementById("review-response-save");
+  saveBtn.disabled = true;
+
+  const { error } = await supabase
+    .from("reviews")
+    .update({
+      admin_response: response || null,
+      admin_response_at: response ? new Date().toISOString() : null,
+    })
+    .eq("id", reviewId);
+
+  saveBtn.disabled = false;
+
+  if (error) {
+    alert("Couldn't save your response: " + error.message);
+    return;
+  }
+
+  modal.classList.remove("active");
+  await loadReviews();
+  renderReviews();
+});
 
 /* ─────────────────────────────────────────
    INIT
