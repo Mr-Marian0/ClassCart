@@ -192,6 +192,23 @@ body {
   text-decoration: underline;
 }
 
+.forgot-password-link {
+  text-align: right;
+  margin: -0.6rem 0 1.2rem;
+}
+
+.forgot-password-link a {
+  font-size: 0.85rem;
+  color: var(--cc-slate);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-password-link a:hover {
+  color: var(--cc-ink);
+  text-decoration: underline;
+}
+
 /* ─────────────────────────────────────────
    RESPONSIVE
 ───────────────────────────────────────── */

@@ -34,6 +34,9 @@
             <label for="login-password">Password</label>
             <input type="password" id="login-password" placeholder="••••••••" />
           </div>
+          <p class="forgot-password-link">
+            <a href="#" id="open-forgot-password">Forgot password?</a>
+          </p>
 
           <button class="account-btn" id="login-btn">Login</button>
           <p class="account-switch">
@@ -302,6 +305,24 @@
         <div class="cc-modal-actions">
           <button class="btn-outline" id="delete-account-close" type="button">Cancel</button>
           <button class="btn-danger" id="delete-account-confirm" type="button">Delete My Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forgot Password -->
+    <div class="cc-modal" id="forgot-password-modal">
+      <div class="cc-modal-box">
+        <h3>Reset your password</h3>
+        <p class="cc-modal-sub" id="forgot-password-status">
+          Enter your account email and we'll send you a link to reset your password.
+        </p>
+        <div class="form-group" id="forgot-password-form-group">
+          <label for="forgot-password-email">Email</label>
+          <input type="email" id="forgot-password-email" placeholder="juan@email.com" />
+        </div>
+        <div class="cc-modal-actions">
+          <button class="btn-outline" id="forgot-password-close" type="button">Cancel</button>
+          <button class="btn-primary-sm" id="forgot-password-send" type="button">Send Reset Link</button>
         </div>
       </div>
     </div>

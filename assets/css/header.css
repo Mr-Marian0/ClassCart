@@ -42,6 +42,13 @@ body {
   align-items: center;
   gap: 1.5rem;
 }
+/* THIS IS FROM RESET-PASSWORD.HTML */
+.form-group1 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 
 /* ── Logo ── */
 .header-logo {

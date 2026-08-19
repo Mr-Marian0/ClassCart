@@ -235,7 +235,7 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   cacheUser(data.user, profile);
 
   if (window.emieReact) {
-    window.emieReact("assets/gifs/kilig_emie.gif", `Welcome back, ${profile.name}! Ready to shop? 🛍`, 2500);
+    window.emieReact("assets/gifs/kilig_emie.gif", `Welcome back, ${profile.name}! Ready to shop?`, 2500);
   }
 
   setTimeout(() => {
@@ -884,4 +884,54 @@ document.getElementById("wishlist-list").addEventListener("click", async (e) => 
       window.emieReact("assets/gifs/kilig_emie.gif", `${p.name} added to your cart!`, 2200);
     }
   }
+});
+/* ─────────────────────────────────────────
+   FORGOT PASSWORD
+   Uses Supabase Auth's built-in recovery flow — Supabase generates and
+   stores the reset token securely on its own servers; we never see or
+   handle the raw token ourselves. The email links to reset-password.html.
+───────────────────────────────────────── */
+const NEUTRAL_RESET_MESSAGE =
+  "If an account exists for this email, we've sent instructions to reset the password. Check your inbox (and spam folder).";
+
+document.getElementById("open-forgot-password").addEventListener("click", (e) => {
+  e.preventDefault();
+  document.getElementById("forgot-password-status").textContent =
+    "Enter your account email and we'll send you a link to reset your password.";
+  document.getElementById("forgot-password-form-group").hidden = false;
+  document.getElementById("forgot-password-send").hidden = false;
+  document.getElementById("forgot-password-email").value = document.getElementById("login-email").value || "";
+  document.getElementById("forgot-password-modal").classList.add("active");
+});
+
+document.getElementById("forgot-password-close").addEventListener("click", () => {
+  document.getElementById("forgot-password-modal").classList.remove("active");
+});
+
+document.getElementById("forgot-password-send").addEventListener("click", async () => {
+  const email = document.getElementById("forgot-password-email").value.trim();
+  const sendBtn = document.getElementById("forgot-password-send");
+
+  if (!email) {
+    alert("Please enter your email.");
+    return;
+  }
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Sending…";
+
+  // Supabase always resolves this the same way whether or not the email
+  // belongs to an account — that's intentional, and it's what keeps this
+  // from being usable to guess which emails are registered.
+  await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password.html`,
+  });
+
+  sendBtn.disabled = false;
+  sendBtn.textContent = "Send Reset Link";
+
+  // Same message shown no matter the outcome — see comment above.
+  document.getElementById("forgot-password-status").textContent = NEUTRAL_RESET_MESSAGE;
+  document.getElementById("forgot-password-form-group").hidden = true;
+  sendBtn.hidden = true;
 });
