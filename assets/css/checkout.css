@@ -174,18 +174,16 @@ body {
   line-height: 1.3;
 }
 
-.checkout-item-qty {
-  font-size: 0.8rem;
+.checkout-item-line {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
   color: var(--cc-slate);
-  font-weight: 500;
+  margin-top: 0.2rem;
 }
 
-.checkout-item-price {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.9rem;
-  font-weight: 600;
+.checkout-item-line strong {
   color: var(--cc-leaf);
-  margin-top: 0.2rem;
+  font-weight: 600;
 }
 
 .summary-row {

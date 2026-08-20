@@ -25,15 +25,17 @@ function loadCheckoutSummary() {
   }
 
   cart.forEach((item) => {
-    subtotal += item.price * item.quantity;
+    const lineTotal = item.price * item.quantity;
+    subtotal += lineTotal;
     const row = document.createElement("div");
     row.classList.add("checkout-item-row");
     row.innerHTML = `
       <img src="${item.image}" alt="${item.name}">
       <div class="checkout-item-details">
         <p class="checkout-item-name">${item.name}</p>
-        <p class="checkout-item-qty">Qty: ${item.quantity}</p>
-        <p class="checkout-item-price">₱${(item.price * item.quantity).toFixed(2)}</p>
+        <p class="checkout-item-line">
+          ₱${item.price.toFixed(2)} × ${item.quantity} = <strong>₱${lineTotal.toFixed(2)}</strong>
+        </p>
       </div>
     `;
     container.appendChild(row);

@@ -66,6 +66,12 @@ body {
   border-radius: var(--cc-radius);
   background: var(--cc-white);
   transition: box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+
+.cart-item-controls,
+.cart-item-controls * {
+  cursor: default;
 }
 
 .cart-item:hover {
@@ -108,6 +114,18 @@ body {
   font-family: 'DM Mono', monospace;
   font-size: 0.95rem;
   color: var(--cc-leaf);
+  font-weight: 600;
+}
+
+.cart-item-line {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--cc-slate);
+  margin-top: 0.15rem;
+}
+
+.cart-item-line strong {
+  color: var(--cc-ink);
   font-weight: 600;
 }
 
@@ -319,5 +337,65 @@ body {
 
   .cart-summary {
     padding: 1.25rem;
+  }
+}
+
+/* ─────────────────────────────────────────
+   UNDO TOAST
+───────────────────────────────────────── */
+.cart-undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.5rem;
+  transform: translate(-50%, 120%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cc-ink);
+  color: var(--cc-white);
+  padding: 0.85rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 150;
+  opacity: 0;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.cart-undo-toast.show {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.cart-undo-toast #cart-undo-btn {
+  appearance: none;
+  border: none;
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cart-undo-toast #cart-undo-btn:hover {
+  background: #f5cc28;
+}
+
+@media (max-width: 480px) {
+  .cart-undo-toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    transform: translateY(120%);
+    justify-content: space-between;
+  }
+
+  .cart-undo-toast.show {
+    transform: translateY(0);
   }
 }
