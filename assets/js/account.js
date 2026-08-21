@@ -235,7 +235,7 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   cacheUser(data.user, profile);
 
   if (window.emieReact) {
-    window.emieReact("assets/gifs/kilig_emie.gif", `Welcome back, ${profile.name}! Ready to shop?`, 2500);
+    window.emieReact("assets/gifs/kilig_emie.gif", `Welcome back, ${profile.name}! Ready to shop? 🛍`, 2500);
   }
 
   setTimeout(() => {
@@ -349,20 +349,38 @@ async function renderOrders() {
     const card = document.createElement("div");
     card.className = "order-card";
     card.innerHTML = `
-      <div class="order-card-head">
+      <div class="order-card-head" data-order-id="${order.id}">
         <div class="order-card-head-field">
           <span class="label">Order placed</span>
           <strong>${placedDate}</strong>
         </div>
         <div class="order-card-head-field">
           <span class="label">Total</span>
-          <strong>₱${Number(order.total).toFixed(2)}</strong>
+          <strong>₱${Number(order.total).toFixed(2)} <span class="total-caret">▾</span></strong>
         </div>
         <div class="order-card-head-field">
           <span class="label">Ship to</span>
           <strong>${order.ship_name || "—"}</strong>
         </div>
         <div class="order-card-id">Order #${order.id}</div>
+      </div>
+
+      <div class="order-total-breakdown-wrapper" id="breakdown-${order.id}">
+        <div class="order-total-breakdown-inner">
+          <div class="order-total-breakdown">
+            ${(order.order_items || [])
+              .map((item) => {
+                const lineTotal = item.unit_price * item.quantity;
+                return `
+              <div class="order-total-breakdown-line">
+                <span>${item.product_name}</span>
+                <span>₱${Number(item.unit_price).toFixed(2)} × ${item.quantity} = <strong>₱${lineTotal.toFixed(2)}</strong></span>
+              </div>
+            `;
+              })
+              .join("")}
+          </div>
+        </div>
       </div>
 
       <div class="order-status-row">
@@ -396,6 +414,30 @@ async function renderOrders() {
     list.appendChild(card);
   });
 }
+
+document.getElementById("orders-list").addEventListener("click", (e) => {
+  const head = e.target.closest(".order-card-head");
+  if (!head) return;
+  
+  const orderId = head.dataset.orderId;
+  const wrapper = document.getElementById(`breakdown-${orderId}`);
+  const caret = head.querySelector(".total-caret");
+  
+  if (wrapper) {
+    wrapper.classList.toggle("open");
+    if (caret) {
+      caret.style.transform = wrapper.classList.contains("open") ? "rotate(180deg)" : "rotate(0deg)";
+    }
+  }
+});
+
+document.getElementById("orders-list").addEventListener("click", (e) => {
+  const totalToggle = e.target.closest(".order-total-toggle");
+  if (!totalToggle) return;
+  const breakdown = document.getElementById(`breakdown-${totalToggle.dataset.orderId}`);
+  breakdown.hidden = !breakdown.hidden;
+  totalToggle.classList.toggle("open", !breakdown.hidden);
+});
 
 document.querySelectorAll(".orders-subtab").forEach((tab) => {
   tab.addEventListener("click", () => {

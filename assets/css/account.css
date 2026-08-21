@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── CSS TOKENS ── */
 :root {
@@ -450,6 +450,12 @@ body {
   background: var(--cc-paper);
   padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--cc-border);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.order-card-head:hover {
+  background: #f1f3f5;
 }
 
 .order-card-head-field {
@@ -476,6 +482,74 @@ body {
   color: var(--cc-slate);
   text-align: right;
 }
+
+.order-total-toggle {
+  appearance: none;
+  border: 1px solid transparent;
+  background: none;
+  padding: 0.3rem 0.5rem;
+  margin: -0.3rem -0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.order-total-toggle:hover {
+  background: var(--cc-white);
+  border-color: var(--cc-border);
+}
+
+.total-caret {
+  display: inline-block;
+  font-size: 0.7rem;
+  color: var(--cc-slate);
+  transition: transform 0.25s ease;
+}
+
+.order-total-toggle.open .total-caret {
+  transform: rotate(180deg);
+}
+
+/* ── ORDER TOTAL BREAKDOWN DROPDOWN ── */
+.order-total-breakdown-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+  background: var(--cc-white);
+  border-bottom: 1px solid var(--cc-border);
+}
+
+.order-total-breakdown-wrapper.open {
+  grid-template-rows: 1fr;
+}
+
+.order-total-breakdown-inner {
+  overflow: hidden;
+}
+
+.order-total-breakdown {
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.order-total-breakdown-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: var(--cc-slate);
+}
+
+.order-total-breakdown-line strong {
+  color: var(--cc-leaf);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── END ORDER TOTAL BREAKDOWN ── */
 
 .order-status-row {
   display: flex;
