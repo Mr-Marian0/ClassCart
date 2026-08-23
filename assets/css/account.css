@@ -845,6 +845,24 @@ body {
   color: #DC2626;
 }
 
+.product-add-btn{
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  border: none;
+  padding: 0.6rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  margin-top: auto;
+  transition: background 0.2s;
+}
+
+.product-add-btn:hover {
+  background: #f5cc28;
+}
+
 /* ─────────────────────────────────────────
    WISHLIST
 ───────────────────────────────────────── */
@@ -919,6 +937,8 @@ body {
   font-weight: 600;
   color: var(--cc-leaf);
 }
+
+
 
 /* ─────────────────────────────────────────
    SHARED: small primary button + form grid
