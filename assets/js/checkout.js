@@ -54,6 +54,59 @@ const checkoutLocations = initAddressLocations({
   barangayId: "checkout-barangay",
 });
 
+// ── Saved address dropdown ──
+let savedAddresses = [];
+
+async function loadSavedAddresses() {
+  const { data, error } = await supabase
+    .from("addresses")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("is_default", { ascending: false })
+    .order("id", { ascending: false });
+
+  if (error) {
+    console.error("Failed to load saved addresses:", error);
+    return;
+  }
+
+  savedAddresses = data || [];
+  const select = document.getElementById("checkout-saved-address");
+
+  savedAddresses.forEach((addr) => {
+    const option = document.createElement("option");
+    option.value = addr.id;
+    option.textContent = `${addr.label || "Address"} — ${addr.address_line}, ${addr.city}${addr.is_default ? " (Default)" : ""}`;
+    select.appendChild(option);
+  });
+}
+
+document.getElementById("checkout-saved-address").addEventListener("change", async (e) => {
+  const addr = savedAddresses.find((a) => a.id == e.target.value);
+
+  if (!addr) {
+    // "+ Enter a new address" selected — clear the form for manual entry
+    document.getElementById("checkout-name").value = "";
+    document.getElementById("checkout-address").value = "";
+    document.getElementById("checkout-zip").value = "";
+    await checkoutLocations.reset();
+    return;
+  }
+
+  document.getElementById("checkout-name").value = addr.full_name;
+  document.getElementById("checkout-address").value = addr.address_line;
+  document.getElementById("checkout-zip").value = addr.zip;
+
+  await checkoutLocations.setValues({
+    region: addr.region,
+    province: addr.province,
+    city: addr.city,
+    barangay: addr.barangay,
+  });
+});
+
+loadSavedAddresses();
+
 // Place order
 const placeOrderBtn = document.getElementById("place-order-btn");
 

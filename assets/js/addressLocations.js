@@ -277,7 +277,8 @@ export function initAddressLocations({
       if (provinceOption) {
         province.value = provinceOption.value;
         provinceIdValue = provinceOption.value;
-        await loadCities(provinceIdValue);
+        const provincePsgcCode = provinceOption.dataset.psgcCode || "";
+        await loadCities(provinceIdValue, region.value, provincePsgcCode);
       } else {
         // Province-less location: load cities directly from the region.
         await loadCities(null, region.value);
@@ -296,7 +297,8 @@ export function initAddressLocations({
     if (!cityOption) return;
 
     city.value = cityOption.value;
-    await loadBarangays(city.value);
+    const cityPsgcCode = cityOption.dataset.psgcCode || "";
+    await loadBarangays(city.value, cityPsgcCode);
 
     const barangayOption = Array.from(barangay.options).find(
       (o) =>
