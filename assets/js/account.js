@@ -1,3 +1,4 @@
+import { initAddressLocations } from "./addressLocations.js";
 import { supabase } from "./supabaseClient.js";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -660,7 +661,13 @@ document.getElementById("delete-account-confirm").addEventListener("click", asyn
    SAVED ADDRESSES
 ═══════════════════════════════════════════════════════════════ */
 
-let cachedAddresses = []; // last fetch, reused by edit/set-default/remove handlers
+let cachedAddresses = [];
+const addressLocations = initAddressLocations({
+  regionId: "addr-region",
+  provinceId: "addr-province",
+  cityId: "addr-city",
+  barangayId: "addr-barangay",
+});
 
 async function renderAddresses() {
   const uid = getUserId();
@@ -695,12 +702,15 @@ async function renderAddresses() {
   cachedAddresses.forEach((addr) => {
     const card = document.createElement("div");
     card.className = `address-card ${addr.is_default ? "default" : ""}`;
+    const locationParts = [addr.barangay, addr.city, addr.province, addr.region, addr.zip]
+      .filter(Boolean)
+      .join(", ");
     card.innerHTML = `
       ${addr.is_default ? '<span class="default-badge">Default</span>' : ""}
       <p class="address-label">${addr.label || "Address"}</p>
       <p>${addr.full_name}</p>
       <p>${addr.phone}</p>
-      <p>${addr.address_line}, ${addr.city}, ${addr.province} ${addr.zip}</p>
+      <p>${addr.address_line}${locationParts ? `, ${locationParts}` : ""}</p>
       <p>${addr.country}</p>
       <div class="address-actions">
         ${!addr.is_default ? `<button class="link-btn set-default" data-id="${addr.id}">Set as default</button>` : ""}
@@ -712,14 +722,15 @@ async function renderAddresses() {
   });
 }
 
-document.getElementById("add-address-btn").addEventListener("click", () => {
+document.getElementById("add-address-btn").addEventListener("click", async () => {
   document.getElementById("address-modal-title").textContent = "Add New Address";
   document.getElementById("address-modal").dataset.editId = "";
-  ["addr-label", "addr-fullname", "addr-phone", "addr-line", "addr-city", "addr-province", "addr-zip"].forEach(
+  ["addr-label", "addr-fullname", "addr-phone", "addr-line", "addr-zip"].forEach(
     (id) => (document.getElementById(id).value = "")
   );
   document.getElementById("addr-country").value = "Philippines";
   document.getElementById("addr-default").checked = false;
+  await addressLocations.reset();
   document.getElementById("address-modal").classList.add("active");
 });
 
@@ -735,23 +746,24 @@ document.getElementById("address-modal-save").addEventListener("click", async ()
   const fullName = document.getElementById("addr-fullname").value.trim();
   const phone = document.getElementById("addr-phone").value.trim();
   const addressLine = document.getElementById("addr-line").value.trim();
-  const city = document.getElementById("addr-city").value.trim();
-  const province = document.getElementById("addr-province").value.trim();
+  const location = addressLocations.getValues();
   const zip = document.getElementById("addr-zip").value.trim();
   const country = document.getElementById("addr-country").value.trim();
   const label = document.getElementById("addr-label").value.trim() || "Address";
   const isDefault = document.getElementById("addr-default").checked || cachedAddresses.length === 0;
 
-  if (!fullName || !phone || !addressLine || !city || !province || !zip || !country) {
-    alert("Please fill in all fields.");
+  if (!fullName || !phone || !addressLine || !location.region || !location.city || !location.barangay || !zip || !country) {
+    alert("Please fill in all address fields.");
     return;
   }
+
+  // The addresses table currently requires province to be non-null.
+  // For a province-less location such as NCR, use the region name in that field.
+  const province = location.province || location.region;
 
   const saveBtn = document.getElementById("address-modal-save");
   saveBtn.disabled = true;
 
-  // If this address is becoming the default, unset default on every other
-  // address first — a user should only ever have one default at a time.
   if (isDefault) {
     let unsetQuery = supabase.from("addresses").update({ is_default: false }).eq("user_id", uid);
     if (editId) unsetQuery = unsetQuery.neq("id", editId);
@@ -769,8 +781,10 @@ document.getElementById("address-modal-save").addEventListener("click", async ()
     full_name: fullName,
     phone,
     address_line: addressLine,
-    city,
+    region: location.region,
     province,
+    city: location.city,
+    barangay: location.barangay,
     zip,
     country,
     is_default: isDefault,
@@ -816,14 +830,20 @@ document.getElementById("address-list").addEventListener("click", async (e) => {
     document.getElementById("address-modal-title").textContent = "Edit Address";
     document.getElementById("address-modal").dataset.editId = addr.id;
     document.getElementById("addr-label").value = addr.label || "";
-    document.getElementById("addr-fullname").value = addr.full_name;
-    document.getElementById("addr-phone").value = addr.phone;
-    document.getElementById("addr-line").value = addr.address_line;
-    document.getElementById("addr-city").value = addr.city;
-    document.getElementById("addr-province").value = addr.province;
-    document.getElementById("addr-zip").value = addr.zip;
-    document.getElementById("addr-country").value = addr.country;
+    document.getElementById("addr-fullname").value = addr.full_name || "";
+    document.getElementById("addr-phone").value = addr.phone || "";
+    document.getElementById("addr-line").value = addr.address_line || "";
+    document.getElementById("addr-zip").value = addr.zip || "";
+    document.getElementById("addr-country").value = addr.country || "Philippines";
     document.getElementById("addr-default").checked = !!addr.is_default;
+
+    await addressLocations.setValues({
+      region: addr.region || "",
+      province: addr.province || "",
+      city: addr.city || "",
+      barangay: addr.barangay || "",
+    });
+
     document.getElementById("address-modal").classList.add("active");
   }
 

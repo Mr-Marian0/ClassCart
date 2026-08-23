@@ -1135,3 +1135,53 @@ body {
     justify-content: flex-start;
   }
 }
+
+/* Address form fixes */
+.form-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.form-grid > .form-group {
+  min-width: 0;
+}
+
+.form-grid .form-group input,
+.form-grid .form-group select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.form-grid .form-group select {
+  height: 48px;
+  padding: 0 2.5rem 0 0.9rem;
+  background-color: var(--cc-white);
+  cursor: pointer;
+  appearance: auto;
+}
+
+.form-grid .form-group select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+#address-modal .cc-modal-box {
+  width: min(620px, 100%);
+  max-width: 620px;
+  overflow-x: hidden;
+}
+
+@media (max-width: 600px) {
+  #address-modal .cc-modal-box {
+    width: 100%;
+  }
+
+  #address-modal .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #address-modal .form-grid .span-2 {
+    grid-column: auto;
+  }
+}

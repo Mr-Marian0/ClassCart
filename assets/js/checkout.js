@@ -1,3 +1,4 @@
+import { initAddressLocations } from "./addressLocations.js";
 import { supabase } from "./supabaseClient.js";
 
 // Require login before allowing checkout
@@ -45,22 +46,30 @@ function loadCheckoutSummary() {
   document.getElementById("checkout-total").textContent = `₱${subtotal.toFixed(2)}`;
 }
 
+// Philippine delivery location selectors
+const checkoutLocations = initAddressLocations({
+  regionId: "checkout-region",
+  provinceId: "checkout-province",
+  cityId: "checkout-city",
+  barangayId: "checkout-barangay",
+});
+
 // Place order
 const placeOrderBtn = document.getElementById("place-order-btn");
 
 placeOrderBtn.addEventListener("click", async () => {
   const name = document.getElementById("checkout-name").value.trim();
   const address = document.getElementById("checkout-address").value.trim();
-  const city = document.getElementById("checkout-city").value.trim();
-  const province = document.getElementById("checkout-province").value.trim();
+  const location = checkoutLocations.getValues();
   const zip = document.getElementById("checkout-zip").value.trim();
   const country = document.getElementById("checkout-country").value.trim();
 
-  if (!name || !address || !city || !province || !zip || !country) {
-    alert("Please fill in all fields.");
+  if (!name || !address || !location.region || !location.city || !location.barangay || !zip || !country) {
+    alert("Please fill in all delivery address fields.");
     return;
   }
 
+  const province = location.province || location.region;
   const payment = document.querySelector('input[name="payment"]:checked').value;
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
@@ -81,8 +90,10 @@ placeOrderBtn.addEventListener("click", async () => {
       user_id: user.id,
       ship_name: name,
       ship_address: address,
-      ship_city: city,
+      ship_region: location.region,
       ship_province: province,
+      ship_city: location.city,
+      ship_barangay: location.barangay,
       ship_zip: zip,
       ship_country: country,
       payment_method: payment,
@@ -115,9 +126,6 @@ placeOrderBtn.addEventListener("click", async () => {
 
   if (itemsError) {
     console.error("Order items insert failed:", itemsError);
-
-    // Roll back the order header we just created — otherwise it's left
-    // behind as an empty "Processing" order that never really happened.
     await supabase.from("orders").delete().eq("id", order.id);
 
     const friendlyMessage = itemsError.message.includes("insufficient_stock")
@@ -130,17 +138,14 @@ placeOrderBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Clear cart
   localStorage.removeItem("cart");
 
-  // Update cart count
   const cartCount = document.getElementById("cart-count");
   if (cartCount) {
     cartCount.textContent = "0";
     cartCount.style.display = "none";
   }
 
-  // Emie celebration
   if (window.emieReact) {
     window.emieReact(
       "assets/gifs/kilig_emie.gif",
@@ -149,9 +154,7 @@ placeOrderBtn.addEventListener("click", async () => {
     );
   }
 
-  // Show modal
   document.getElementById("order-modal").classList.add("active");
-
   placeOrderBtn.disabled = false;
   placeOrderBtn.textContent = "Place Order";
 });

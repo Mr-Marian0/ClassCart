@@ -225,24 +225,42 @@
             <input type="text" id="addr-phone" placeholder="09XX XXX XXXX" />
           </div>
           <div class="form-group span-2">
-            <label for="addr-line">Address</label>
-            <input type="text" id="addr-line" placeholder="123 Rizal Street" />
+            <label for="addr-line">Address Line</label>
+            <input type="text" id="addr-line" placeholder="78A Silawan St." />
           </div>
           <div class="form-group">
-            <label for="addr-city">City</label>
-            <input type="text" id="addr-city" placeholder="Manila" />
+            <label for="addr-region">Region</label>
+            <select id="addr-region">
+              <option value="" selected disabled>Select Region</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="addr-province">Province</label>
-            <input type="text" id="addr-province" placeholder="Metro Manila" />
+            <select id="addr-province" disabled>
+              <option value="" selected disabled>Select Province</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="addr-city">City / Municipality</label>
+            <select id="addr-city" disabled>
+              <option value="" selected disabled>Select City / Municipality</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="addr-barangay">Barangay</label>
+            <select id="addr-barangay" disabled>
+              <option value="" selected disabled>Select Barangay</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="addr-zip">ZIP Code</label>
-            <input type="text" id="addr-zip" placeholder="1000" />
+            <input type="text" id="addr-zip" placeholder="3709" inputmode="numeric" maxlength="4" />
           </div>
           <div class="form-group">
             <label for="addr-country">Country</label>
-            <input type="text" id="addr-country" placeholder="Philippines" value="Philippines" />
+            <select id="addr-country">
+              <option value="Philippines" selected>Philippines</option>
+            </select>
           </div>
         </div>
         <label class="cc-checkbox-row">

@@ -420,3 +420,29 @@ body {
     font-size: 0.78rem;
   }
 }
+
+/* Philippine location select styling */
+.checkout-form .form-group select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  background: var(--cc-white);
+  font-size: 0.95rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--cc-ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.checkout-form .form-group select:focus {
+  border-color: var(--cc-yellow);
+  box-shadow: 0 0 0 3px rgba(255, 217, 61, 0.18);
+}
+
+.checkout-form .form-group select:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
