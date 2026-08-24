@@ -256,3 +256,27 @@ document.addEventListener("DOMContentLoaded", () => {
     observer.observe(hero);
 
 });
+
+// ================= HOW IT WORKS SECTION =================
+
+document.getElementById("see-how-btn")?.addEventListener("click", () => {
+  document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+const howItWorksSection = document.getElementById("how-it-works");
+
+if (howItWorksSection) {
+  const howItWorksObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          howItWorksSection.classList.add("in-view");
+          howItWorksObserver.unobserve(howItWorksSection); // animate once, not on every scroll pass
+        }
+      });
+    },
+    { threshold: 0.3 }
+  );
+
+  howItWorksObserver.observe(howItWorksSection);
+}
