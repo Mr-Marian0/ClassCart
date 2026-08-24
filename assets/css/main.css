@@ -685,3 +685,314 @@ html, body {
     right: 12px;
   }
 }
+
+/* ─────────────────────────────────────────
+   HOW IT WORKS SECTION
+───────────────────────────────────────── */
+.how-it-works-section {
+  padding: 5rem 2rem;
+  background: var(--cc-paper);
+}
+
+.how-it-works-header {
+  max-width: 700px;
+  margin: 0 auto 3.5rem;
+  text-align: center;
+}
+
+.how-it-works-eyebrow {
+  display: inline-block;
+  background: var(--cc-yellow);
+  color: var(--cc-ink);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+.how-it-works-header h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--cc-ink);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.how-it-works-grid {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem;
+}
+
+.how-it-works-line {
+  position: absolute;
+  top: 45px;
+  left: 12.5%;
+  width: 75%;
+  height: 2px;
+  overflow: visible;
+  z-index: 0;
+}
+
+.how-it-works-line line {
+  stroke: var(--cc-border);
+  stroke-width: 2;
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke-dashoffset 1.4s ease;
+}
+
+.how-it-works-section.in-view .how-it-works-line line {
+  stroke-dashoffset: 0;
+  stroke: var(--cc-yellow);
+}
+
+.how-it-works-step {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.how-it-works-section.in-view .how-it-works-step {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.how-it-works-step:nth-child(2) { transition-delay: 0.15s; }
+.how-it-works-step:nth-child(3) { transition-delay: 0.3s; }
+.how-it-works-step:nth-child(4) { transition-delay: 0.45s; }
+
+.how-it-works-icon {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: var(--cc-white);
+  border: 1px solid var(--cc-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+  color: var(--cc-ink);
+}
+
+.how-it-works-icon svg {
+  width: 52px;
+  height: 52px;
+}
+
+.how-it-works-step-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cc-slate);
+}
+
+.how-it-works-step h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--cc-ink);
+  margin: 0.1rem 0 0;
+}
+
+.how-it-works-step p {
+  font-size: 0.88rem;
+  color: var(--cc-slate);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 240px;
+}
+
+/* ── Step 1: Search — glass wiggles, supply icons pop in around it ── */
+.hiw-part { transform-box: fill-box; transform-origin: center; }
+
+.icon-search .hiw-glass,
+.icon-search .hiw-handle {
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.how-it-works-section.in-view .icon-search .hiw-glass,
+.how-it-works-section.in-view .icon-search .hiw-handle {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.how-it-works-section.in-view .icon-search .hiw-glass {
+  animation: hiw-wiggle 1.6s ease 0.4s 1;
+}
+
+.icon-search .hiw-orbit {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.how-it-works-section.in-view .icon-search .hiw-orbit-1 { animation: hiw-orbit-pop 0.5s ease 0.5s forwards; }
+.how-it-works-section.in-view .icon-search .hiw-orbit-2 { animation: hiw-orbit-pop 0.5s ease 0.65s forwards; }
+.how-it-works-section.in-view .icon-search .hiw-orbit-3 { animation: hiw-orbit-pop 0.5s ease 0.8s forwards; }
+
+@keyframes hiw-wiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  20% { transform: rotate(-10deg) scale(1); }
+  40% { transform: rotate(8deg) scale(1); }
+  60% { transform: rotate(-5deg) scale(1); }
+  80% { transform: rotate(3deg) scale(1); }
+}
+
+@keyframes hiw-orbit-pop {
+  0% { opacity: 0; transform: scale(0); }
+  70% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Step 2: Cart — items drop in, cart bounces ── */
+.icon-cart .hiw-cart-body {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.how-it-works-section.in-view .icon-cart .hiw-cart-body {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.icon-cart .hiw-drop {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.how-it-works-section.in-view .icon-cart .hiw-drop-1 { animation: hiw-drop-in 0.45s ease 0.45s forwards; }
+.how-it-works-section.in-view .icon-cart .hiw-drop-2 { animation: hiw-drop-in 0.45s ease 0.6s forwards; }
+.how-it-works-section.in-view .icon-cart .hiw-drop-3 { animation: hiw-drop-in 0.45s ease 0.75s forwards; }
+
+.how-it-works-section.in-view .icon-cart .hiw-cart-body {
+  animation: hiw-cart-bounce 0.4s ease 0.95s 1;
+}
+
+@keyframes hiw-drop-in {
+  0% { opacity: 0; transform: translateY(-14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hiw-cart-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-3px) scale(1.03); }
+}
+
+/* ── Step 3: Package — flaps open, checkmark appears ── */
+.icon-package .hiw-box-body {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.how-it-works-section.in-view .icon-package .hiw-box-body {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.icon-package .hiw-flap {
+  opacity: 0;
+  transform: rotate(0deg);
+}
+
+.how-it-works-section.in-view .icon-package .hiw-flap-left {
+  opacity: 1;
+  animation: hiw-flap-left 0.5s ease 0.4s forwards;
+}
+
+.how-it-works-section.in-view .icon-package .hiw-flap-right {
+  opacity: 1;
+  animation: hiw-flap-right 0.5s ease 0.4s forwards;
+}
+
+.icon-package .hiw-check {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.how-it-works-section.in-view .icon-package .hiw-check {
+  animation: hiw-check-pop 0.4s ease 0.85s forwards;
+}
+
+@keyframes hiw-flap-left {
+  0% { transform: rotate(0deg) translateX(0); }
+  50% { transform: rotate(-12deg) translateX(-2px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+@keyframes hiw-flap-right {
+  0% { transform: rotate(0deg) translateX(0); }
+  50% { transform: rotate(12deg) translateX(2px); }
+  100% { transform: rotate(0deg) translateX(0); }
+}
+
+@keyframes hiw-check-pop {
+  0% { opacity: 0; transform: scale(0.5); }
+  70% { opacity: 1; transform: scale(1.15); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Step 4: Backpack — lifts up, sparkle twinkles ── */
+.icon-backpack .hiw-backpack {
+  opacity: 0;
+  transform: translateY(8px) scale(0.9);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.how-it-works-section.in-view .icon-backpack .hiw-backpack {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.how-it-works-section.in-view .icon-backpack .hiw-backpack {
+  animation: hiw-backpack-lift 0.6s ease 0.5s 1;
+}
+
+.icon-backpack .hiw-sparkle {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.how-it-works-section.in-view .icon-backpack .hiw-sparkle-1 { animation: hiw-sparkle-pop 0.5s ease 0.75s forwards; }
+.how-it-works-section.in-view .icon-backpack .hiw-sparkle-2 { animation: hiw-sparkle-pop 0.5s ease 0.9s forwards; }
+
+@keyframes hiw-backpack-lift {
+  0% { transform: translateY(6px) scale(1); }
+  60% { transform: translateY(-5px) scale(1); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes hiw-sparkle-pop {
+  0% { opacity: 0; transform: scale(0) rotate(-10deg); }
+  60% { opacity: 1; transform: scale(1.2) rotate(5deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+@media (max-width: 900px) {
+  .how-it-works-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 1.5rem;
+  }
+  .how-it-works-line { display: none; }
+}
+
+@media (max-width: 520px) {
+  .how-it-works-section { padding: 3.5rem 1.25rem; }
+  .how-it-works-grid { grid-template-columns: 1fr; }
+  .how-it-works-header h2 { font-size: 1.6rem; }
+}
