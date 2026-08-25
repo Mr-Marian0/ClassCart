@@ -4,10 +4,9 @@
     <div class="footer-col">
       <h3>About ClassCart</h3>
       <ul>
-        <li><a href="#about">About Us</a></li>
-        <li><a href="#careers">Careers</a></li>
-        <li><a href="#affiliates">Affiliates</a></li>
-        <li><a href="#blog">Blog</a></li>
+        <li><a id="about-us-link" href="#about">About Us</a></li>
+        <li><a id="careers-link" href="#careers">Careers</a></li>
+        <li><a id="affiliates-link" href="#affiliates">Affiliates</a></li>
       </ul>
     </div>
 
@@ -16,7 +15,6 @@
       <ul>
         <li><a href="#account">My Account</a></li>
         <li><a href="#orders">Order Status</a></li>
-        <li><a href="#returns">Returns & Exchanges</a></li>
         <li><a href="#contact">Contact Us</a></li>
       </ul>
     </div>
@@ -26,8 +24,6 @@
       <ul>
         <li><a href="#ordering">Ordering Guide</a></li>
         <li><a href="#shipping">Shipping Info</a></li>
-        <li><a href="#faqs">FAQs</a></li>
-        <li><a href="#sitemap">Sitemap</a></li>
       </ul>
     </div>
 
@@ -59,11 +55,27 @@
 
   <!-- Footer Bottom -->
   <div class="footer-bottom">
-    <p>&copy; 2025 ClassCart. All rights reserved. Made for students, by students.</p>
     <p>
-      <a href="#terms">Terms of Use</a> | 
-      <a href="#privacy">Privacy Policy</a> | 
+      &copy; 2025 ClassCart. All rights reserved. Made for students, by
+      students.
+    </p>
+    <p>
+      <a href="#terms">Terms of Use</a> |
+      <a href="#privacy">Privacy Policy</a> |
       <a href="#cookies">Cookie Settings</a>
     </p>
+  </div>
+
+  <!-- Footer Info Modal -->
+  <div class="cc-footer-modal-overlay" id="footer-info-modal">
+    <div class="cc-footer-modal">
+      <button class="cc-footer-modal-close" id="footer-modal-close">✕</button>
+
+      <h2 id="footer-modal-title"></h2>
+
+      <p id="footer-modal-text"></p>
+
+      <button class="cc-footer-modal-btn" id="footer-modal-ok">Got It</button>
+    </div>
   </div>
 </footer>

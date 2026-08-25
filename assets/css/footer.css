@@ -198,6 +198,129 @@
   text-decoration: underline;
 }
 
+/* =========================================
+   FOOTER INFO MODAL
+========================================= */
+
+.cc-footer-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    backdrop-filter: blur(6px);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 99999;
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: all 0.3s ease;
+}
+
+.cc-footer-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cc-footer-modal {
+    width: 90%;
+    max-width: 480px;
+
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(18px);
+
+    border: 1px solid var(--cc-border);
+    border-radius: 22px;
+
+    padding: 2rem;
+
+    text-align: center;
+
+    box-shadow:
+        0 25px 60px rgba(17,24,39,0.18);
+
+}
+
+/* Animation */
+.cc-footer-modal-overlay.show .cc-footer-modal {
+    animation: footerModalBounce 0.6s cubic-bezier(.17,.89,.32,1.49);
+}
+
+@keyframes footerModalBounce {
+
+    0% {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+
+    80% {
+        transform: scale(0.96);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.cc-footer-modal h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--cc-ink);
+
+    margin-bottom: 1rem;
+}
+
+.cc-footer-modal p {
+    color: var(--cc-slate);
+    line-height: 1.8;
+    font-size: 0.95rem;
+
+    margin-bottom: 2rem;
+}
+
+.cc-footer-modal-btn {
+    border: none;
+    background: var(--cc-yellow);
+    color: var(--cc-ink);
+
+    padding: 0.9rem 2rem;
+
+    border-radius: 10px;
+
+    font-weight: 700;
+    cursor: pointer;
+
+    transition: all 0.2s;
+}
+
+.cc-footer-modal-btn:hover {
+    transform: translateY(-2px);
+}
+
+.cc-footer-modal-close {
+    position: absolute;
+
+    top: 15px;
+    right: 15px;
+
+    border: none;
+    background: transparent;
+
+    font-size: 1.2rem;
+    cursor: pointer;
+
+    color: var(--cc-slate);
+}
+
 /* ─────────────────────────────────────────
    RESPONSIVE
 ───────────────────────────────────────── */
