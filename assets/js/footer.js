@@ -1,3 +1,7 @@
+// =========================================
+// FOOTER COMPONENT
+// =========================================
+
 fetch("components/footer.html")
   .then((res) => res.text())
   .then((html) => {
@@ -30,7 +34,7 @@ fetch("components/footer.html")
           window.emieReact(
             "assets/gifs/kilig_emie.gif",
             `Thanks for subscribing, ${email}! You'll get great deals!`,
-            2500,
+            2500
           );
         }
 
@@ -59,6 +63,8 @@ fetch("components/footer.html")
 
     // Open modal
     function openFooterModal(title, message) {
+      if (!footerModal) return;
+
       footerModalTitle.textContent = title;
       footerModalText.textContent = message;
 
@@ -67,13 +73,12 @@ fetch("components/footer.html")
 
     // Close modal
     function closeFooterModal() {
+      if (!footerModal) return;
+
       footerModal.classList.remove("show");
     }
 
-    // =========================================
-    // CAREERS
-    // =========================================
-
+    // Careers
     const careersLink = document.getElementById("careers-link");
 
     if (careersLink) {
@@ -82,15 +87,12 @@ fetch("components/footer.html")
 
         openFooterModal(
           "Interested in Working With Us?",
-          "For available job opportunities, please contact the admins for more information.",
+          "For available job opportunities, please contact the admins for more information."
         );
       });
     }
 
-    // =========================================
-    // AFFILIATES
-    // =========================================
-
+    // Affiliates
     const affiliatesLink = document.getElementById("affiliates-link");
 
     if (affiliatesLink) {
@@ -99,31 +101,22 @@ fetch("components/footer.html")
 
         openFooterModal(
           "Interested in Becoming an Affiliate?",
-          "For available commission opportunities and affiliate details, please contact the admins.",
+          "For available commission opportunities and affiliate details, please contact the admins."
         );
       });
     }
 
-    // =========================================
-    // MODAL CLOSE BUTTON
-    // =========================================
-
+    // Close button
     if (footerModalClose) {
       footerModalClose.addEventListener("click", closeFooterModal);
     }
 
-    // =========================================
-    // "GOT IT" BUTTON
-    // =========================================
-
+    // Got It button
     if (footerModalOk) {
       footerModalOk.addEventListener("click", closeFooterModal);
     }
 
-    // =========================================
-    // CLICK OUTSIDE MODAL
-    // =========================================
-
+    // Click outside modal
     if (footerModal) {
       footerModal.addEventListener("click", (e) => {
         if (e.target === footerModal) {
@@ -132,10 +125,7 @@ fetch("components/footer.html")
       });
     }
 
-    // =========================================
-    // ESC KEY
-    // =========================================
-
+    // ESC key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeFooterModal();
@@ -146,8 +136,48 @@ fetch("components/footer.html")
     console.error("Error loading footer:", error);
   });
 
+
+// =========================================
+// HELPER: ARE WE ON THE LANDING PAGE?
+// =========================================
+
+function isLandingPage() {
+  return (
+    window.location.pathname.endsWith("index.html") ||
+    window.location.pathname === "/" ||
+    window.location.pathname.endsWith("/")
+  );
+}
+
+
+// =========================================
+// HELPER: SMOOTH SCROLL
+// =========================================
+
+function smoothScrollToSection(sectionId) {
+  const section = document.getElementById(sectionId);
+
+  if (!section) {
+    return false;
+  }
+
+  section.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
+
+  return true;
+}
+
+
 // =========================================
 // ABOUT US
+// =========================================
+// Landing page:
+//     Smooth scroll → #about-me
+//
+// Other pages:
+//     Redirect → index.html#about-me
 // =========================================
 
 document.addEventListener("click", (e) => {
@@ -159,25 +189,147 @@ document.addEventListener("click", (e) => {
 
   e.preventDefault();
 
-  // If already on the landing page
-  const isLandingPage =
-    window.location.pathname.endsWith("index.html") ||
-    window.location.pathname === "/" ||
-    window.location.pathname.endsWith("/");
+  if (isLandingPage()) {
+    smoothScrollToSection("about-me");
+  } else {
+    window.location.href = "index.html#about-me";
+  }
+});
 
-  if (isLandingPage) {
-    const aboutMeSection = document.getElementById("about-me");
 
-    if (aboutMeSection) {
-      aboutMeSection.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
+// =========================================
+// MY ACCOUNT
+// =========================================
+// Always redirect to account.html
+// =========================================
 
+document.addEventListener("click", (e) => {
+  const accountLink = e.target.closest("#account-link");
+
+  if (!accountLink) {
     return;
   }
 
-  // If on another page, simply go to the landing page
-  window.location.href = "index.html#about-me";
+  e.preventDefault();
+
+  window.location.href = "account.html";
+});
+
+
+// =========================================
+// CONTACT US
+// =========================================
+// Landing page:
+//     Smooth scroll → #about-me
+//     Automatically select Contact tab
+//
+// Other pages:
+//     Redirect → index.html#about-me
+// =========================================
+
+document.addEventListener("click", (e) => {
+  const contactLink = e.target.closest("#contact-link");
+
+  if (!contactLink) {
+    return;
+  }
+
+  e.preventDefault();
+
+  if (isLandingPage()) {
+    const aboutMeSection = document.getElementById("about-me");
+    const contactButton = document.querySelector(
+      '.about-me-nav-btn[data-panel="contact"]'
+    );
+
+    // Select Contact tab
+    if (contactButton) {
+      contactButton.click();
+    }
+
+    // Smoothly scroll to About Me
+    if (aboutMeSection) {
+      aboutMeSection.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    }
+  } else {
+    window.location.href = "index.html#about-me";
+  }
+});
+
+
+// =========================================
+// ORDERING GUIDE
+// =========================================
+// Landing page:
+//     Smooth scroll → #how-it-works
+//
+// Other pages:
+//     Redirect → index.html#how-it-works
+// =========================================
+
+document.addEventListener("click", (e) => {
+  const orderingLink = e.target.closest("#ordering-link");
+
+  if (!orderingLink) {
+    return;
+  }
+
+  e.preventDefault();
+
+  if (isLandingPage()) {
+    smoothScrollToSection("how-it-works");
+  } else {
+    window.location.href = "index.html#how-it-works";
+  }
+});
+
+
+// =========================================
+// NEW ARRIVALS
+// =========================================
+// Always redirect to shop.html
+// =========================================
+
+document.addEventListener("click", (e) => {
+  const newArrivalsLink = e.target.closest("#new-link");
+
+  if (!newArrivalsLink) {
+    return;
+  }
+
+  e.preventDefault();
+
+  window.location.href = "shop.html";
+});
+
+
+// =========================================
+// BEST SELLERS
+// =========================================
+// Same functionality as Ordering Guide
+//
+// Landing page:
+//     Smooth scroll → #how-it-works
+//
+// Other pages:
+//     Redirect → index.html#how-it-works
+// =========================================
+
+document.addEventListener("click", (e) => {
+  const bestSellersLink = e.target.closest("#bestsellers-link");
+
+  if (!bestSellersLink) {
+    return;
+  }
+
+  e.preventDefault();
+
+  if (isLandingPage()) {
+    smoothScrollToSection("top-seller-card");
+  } else {
+    window.location.href = "index.html#top-seller-card";
+  }
 });
