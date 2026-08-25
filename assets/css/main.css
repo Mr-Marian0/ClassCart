@@ -996,3 +996,349 @@ html, body {
   .how-it-works-grid { grid-template-columns: 1fr; }
   .how-it-works-header h2 { font-size: 1.6rem; }
 }
+
+/* ─────────────────────────────────────────
+   ABOUT ME SECTION
+───────────────────────────────────────── */
+.about-me-section {
+  position: relative;
+  padding: 6rem 2rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--cc-white) 0%, var(--cc-paper) 100%);
+}
+
+.about-me-glow {
+  position: absolute;
+  top: -120px;
+  right: -120px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, rgba(255, 217, 61, 0.35), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.about-me-intro {
+  position: relative;
+  z-index: 1;
+  max-width: 640px;
+  margin: 0 auto 3rem;
+  text-align: center;
+}
+
+.about-me-eyebrow {
+  display: inline-block;
+  background: var(--cc-ink);
+  color: var(--cc-yellow);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  margin-bottom: 1.1rem;
+}
+
+.about-me-intro h2 {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: var(--cc-ink);
+  margin: 0 0 0.6rem;
+}
+
+.about-me-intro p {
+  color: var(--cc-slate);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.about-me-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ── Nav ── */
+.about-me-nav {
+  position: relative;
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--cc-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 0.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 30px rgba(17, 24, 39, 0.06);
+}
+
+.about-me-nav-btn {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  appearance: none;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--cc-slate);
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.about-me-nav-btn.active .section_btn {
+  text-shadow: 0 0 4px #f3f7b5; 
+  color: var(--cc-ink);
+  opacity: 1;
+}
+
+.about-me-nav-indicator {
+  position: absolute;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  left: 0.4rem;
+  width: calc((100% - 0.8rem) / 3);
+  background: var(--cc-yellow);
+  border-radius: 12px;
+  z-index: 0;
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+  box-shadow: 0 4px 14px rgba(255, 217, 61, 0.45);
+}
+
+/* ── Panels (glass card) ── */
+.about-me-panels {
+  position: relative;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--cc-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(17, 24, 39, 0.08);
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.about-me-panel {
+  display: none;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 2.5rem;
+  align-items: center;
+  padding: 2.5rem;
+}
+
+.about-me-panel.active {
+  display: grid;
+  animation: about-me-panel-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes about-me-panel-in {
+  0% {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(10px) scale(0.99);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+.about-me-panel-image {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+}
+
+.about-me-panel-image::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  background: radial-gradient(circle, rgba(255, 217, 61, 0.4), transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.about-me-panel-image img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 30px rgba(17, 24, 39, 0.15));
+}
+
+.about-me-panel-text h3 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--cc-ink);
+  margin: 0 0 0.85rem;
+  line-height: 1.3;
+}
+
+.about-me-panel-text p {
+  color: var(--cc-slate);
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin: 0 0 0.85rem;
+}
+
+/* ── Who I Am: stats ── */
+.about-me-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.4rem;
+}
+
+.about-me-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-me-stat strong {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--cc-ink);
+}
+
+.about-me-stat span {
+  font-size: 0.75rem;
+  color: var(--cc-slate);
+}
+
+/* ── Services list ── */
+.about-me-service-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.about-me-service-list li {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.about-me-service-icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--cc-paper);
+  color: var(--cc-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-me-service-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.about-me-service-list strong {
+  display: block;
+  font-size: 0.92rem;
+  color: var(--cc-ink);
+  margin-bottom: 0.2rem;
+}
+
+.about-me-service-list p {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+/* ── Contact list ── */
+.about-me-contact-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.85rem;
+  margin-top: 1.2rem;
+}
+
+.about-me-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--cc-white);
+  border: 1px solid var(--cc-border);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-me-contact-item:hover {
+  border-color: var(--cc-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 217, 61, 0.2);
+}
+
+.about-me-contact-icon {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--cc-paper);
+  color: var(--cc-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about-me-contact-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.about-me-contact-item strong {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--cc-ink);
+}
+
+.about-me-contact-item span {
+  font-size: 0.78rem;
+  color: var(--cc-slate);
+  word-break: break-word;
+}
+
+@media (max-width: 780px) {
+  .about-me-nav-btn span:last-child { display: none; }
+  .about-me-nav-btn { flex-direction: column; gap: 0.2rem; }
+  .about-me-panel { grid-template-columns: 1fr; padding: 1.75rem; gap: 1.5rem; }
+  .about-me-panel-image { max-width: 220px; margin: 0 auto; }
+  .about-me-contact-list { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .about-me-section { padding: 4rem 1.25rem; }
+  .about-me-intro h2 { font-size: 1.6rem; }
+  .about-me-panels { min-height: 0; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .about-me-nav,
+  .about-me-panels {
+    background: var(--cc-white);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

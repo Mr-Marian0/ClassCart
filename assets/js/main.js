@@ -280,3 +280,38 @@ if (howItWorksSection) {
 
   howItWorksObserver.observe(howItWorksSection);
 }
+// ================= ABOUT ME SECTION =================
+
+const aboutMeNav = document.querySelector(".about-me-nav");
+
+if (aboutMeNav) {
+  const navBtns = aboutMeNav.querySelectorAll(".about-me-nav-btn");
+  const indicator = aboutMeNav.querySelector(".about-me-nav-indicator");
+
+  function moveIndicator(btn) {
+    const btnIndex = Array.from(navBtns).indexOf(btn);
+    indicator.style.transform = `translateX(${btnIndex * 100}%)`;
+  }
+
+  // Position the indicator correctly on load (no transition on first paint)
+  indicator.style.transition = "none";
+  moveIndicator(navBtns[0]);
+  requestAnimationFrame(() => {
+    indicator.style.transition = "";
+  });
+
+  navBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      navBtns.forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
+      btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
+      moveIndicator(btn);
+
+      document.querySelectorAll(".about-me-panel").forEach((p) => p.classList.remove("active"));
+      document.getElementById(`panel-${btn.dataset.panel}`)?.classList.add("active");
+    });
+  });
+}
