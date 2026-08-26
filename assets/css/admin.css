@@ -710,3 +710,26 @@ body {
 
 .response-badge.yes { color: var(--cc-leaf); background: #F0FDF4; }
 .response-badge.no { color: var(--cc-slate); background: var(--cc-paper); }
+/* ─────────────────────────────────────────
+   TRUST SCORE
+───────────────────────────────────────── */
+.trust-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.trust-badge.trust-high { color: var(--cc-leaf); background: #F0FDF4; }
+.trust-badge.trust-mid { color: var(--cc-amber); background: #FFFBEB; }
+.trust-badge.trust-low { color: var(--cc-danger); background: #FEF2F2; }
+
+.trust-flag-icon {
+  display: inline-block;
+  color: var(--cc-danger);
+  margin-right: 0.35rem;
+  cursor: help;
+}

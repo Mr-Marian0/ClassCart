@@ -53,11 +53,14 @@ document.querySelectorAll(".admin-tab").forEach((tab) => {
   });
 });
 
+let cachedVerification = {}; // { [userId]: { email_confirmed, account_created } }
+
 /* ─────────────────────────────────────────
    SHARED LOAD
 ───────────────────────────────────────── */
 async function loadEverything() {
   await Promise.all([loadOrders(), loadProducts(), loadProfiles(), loadReviews()]);
+  await loadVerification(); // needs profile IDs, so runs after loadProfiles
   renderOverview();
   renderOrders();
   renderProducts();
@@ -93,6 +96,98 @@ async function loadProfiles() {
     return;
   }
   cachedProfiles = data || [];
+}
+
+async function loadVerification() {
+  const ids = cachedProfiles.map((p) => p.id);
+  if (ids.length === 0) return;
+
+  const { data, error } = await supabase.rpc("get_customer_verification", { user_ids: ids });
+  if (error) {
+    console.error("Failed to load verification status:", error);
+    return;
+  }
+
+  cachedVerification = Object.fromEntries((data || []).map((v) => [v.id, v]));
+}
+
+/* ─────────────────────────────────────────
+   TRUST SCORE
+   Computed fresh on every load from data already on hand — never stored,
+   so it can never go stale. See account.js memory notes / conversation
+   for the full rationale behind each weight.
+───────────────────────────────────────── */
+function computeTrustScore(profile) {
+  let score = 50;
+  const reasons = [];
+
+  const verification = cachedVerification[profile.id];
+  if (verification?.email_confirmed) {
+    score += 20;
+    reasons.push("Email confirmed (+20)");
+  } else {
+    score -= 10;
+    reasons.push("Email not confirmed (-10)");
+  }
+
+  if (verification?.account_created) {
+    const ageDays = (Date.now() - new Date(verification.account_created).getTime()) / 86400000;
+    if (ageDays > 90) {
+      score += 10;
+      reasons.push("Account 90+ days old (+10)");
+    } else if (ageDays > 30) {
+      score += 5;
+      reasons.push("Account 30+ days old (+5)");
+    }
+  }
+
+  const theirOrders = cachedOrders.filter((o) => o.user_id === profile.id);
+  if (theirOrders.length > 0) {
+    const cancelledCount = theirOrders.filter((o) => o.status === "Cancelled").length;
+    const cancelRate = cancelledCount / theirOrders.length;
+    if (cancelRate > 0.5) {
+      score -= 20;
+      reasons.push(`High cancellation rate (-20)`);
+    } else if (cancelRate > 0.2) {
+      score -= 10;
+      reasons.push(`Moderate cancellation rate (-10)`);
+    } else {
+      score += 10;
+      reasons.push("Reliable order history (+10)");
+    }
+
+    const distinctRegions = new Set(theirOrders.map((o) => o.ship_region).filter(Boolean));
+    if (theirOrders.length >= 2) {
+      if (distinctRegions.size === 1) {
+        score += 5;
+        reasons.push("Consistent shipping region (+5)");
+      } else if (distinctRegions.size >= 3) {
+        score -= 10;
+        reasons.push("Ships to many different regions (-10)");
+      }
+    }
+  }
+
+  if (profile.is_review_banned) {
+    score -= 30;
+    reasons.push("Banned from posting reviews (-30)");
+  }
+
+  score = Math.max(0, Math.min(100, score));
+
+  let label, cls;
+  if (score >= 80) {
+    label = "Trusted";
+    cls = "trust-high";
+  } else if (score >= 50) {
+    label = "Neutral";
+    cls = "trust-mid";
+  } else {
+    label = "Flagged";
+    cls = "trust-low";
+  }
+
+  return { score, label, cls, reasons };
 }
 
 async function loadReviews() {
@@ -223,12 +318,19 @@ function renderOrders() {
   const pageItems = paginate("orders", filtered);
 
   pageItems.forEach((order) => {
+    const orderProfile = cachedProfiles.find((p) => p.id === order.user_id);
+    const trust = orderProfile ? computeTrustScore(orderProfile) : null;
+    const trustFlag =
+      trust && trust.cls === "trust-low"
+        ? `<span class="trust-flag-icon" title="Flagged customer: ${trust.reasons.join(" · ")}">⚠</span>`
+        : "";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td><button class="expand-btn" data-order-id="${order.id}" type="button">▸</button></td>
       <td class="mono">#${order.id}</td>
       <td>${new Date(order.created_at).toLocaleDateString()}</td>
-      <td>${profileName(order.user_id)}</td>
+      <td>${trustFlag}${profileName(order.user_id)}</td>
       <td>${order.ship_name}, ${order.ship_city}</td>
       <td class="mono">₱${Number(order.total).toFixed(2)}</td>
       <td>
@@ -658,12 +760,17 @@ function renderCustomers() {
       .filter((o) => o.status !== "Cancelled")
       .reduce((sum, o) => sum + Number(o.total), 0);
 
+    const trust = computeTrustScore(profile);
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${profile.name}</td>
       <td class="mono">${theirOrders.length}</td>
       <td class="mono">₱${spent.toFixed(2)}</td>
       <td>${profile.is_admin ? "Admin" : "Customer"}</td>
+      <td>
+        <span class="trust-badge ${trust.cls}" title="${trust.reasons.join(" · ")}">${trust.label} (${trust.score})</span>
+      </td>
       <td>
         <label class="toggle-switch" title="${profile.is_review_banned ? "Blocked from posting reviews" : "Can post reviews"}">
           <input type="checkbox" class="review-ban-toggle" data-profile-id="${profile.id}" ${!profile.is_review_banned ? "checked" : ""}>
