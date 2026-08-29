@@ -137,8 +137,98 @@ document.addEventListener("click", (e) => {
 });
 
 /* ═══════════════════════════════════════════════════════════════
-   REGISTER
+   CONFIRMATION EMAIL — MODAL + RESEND COOLDOWN
+   Supabase itself rate-limits resend requests (~once per 60s) and
+   throws an error if you call too soon. We track the same cooldown
+   client-side (per email, in localStorage) and reflect it live on the
+   modal's resend button ("Resend in 42s...") instead of relying on
+   alert()/confirm() popups.
 ═══════════════════════════════════════════════════════════════ */
+
+const RESEND_COOLDOWN_MS = 60_000;
+let resendCountdownTimer = null;
+
+function resendCooldownKey(email) {
+  return `ccResendCooldown:${email.toLowerCase()}`;
+}
+
+function getResendCooldownRemaining(email) {
+  const last = Number(localStorage.getItem(resendCooldownKey(email)) || 0);
+  const remaining = RESEND_COOLDOWN_MS - (Date.now() - last);
+  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+}
+
+function markResendSent(email) {
+  localStorage.setItem(resendCooldownKey(email), String(Date.now()));
+}
+
+function tickResendButton(email) {
+  const btn = document.getElementById("verify-email-resend");
+  const secs = getResendCooldownRemaining(email);
+
+  if (secs > 0) {
+    btn.disabled = true;
+    btn.textContent = `Resend in ${secs}s`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = "Resend Email";
+    clearInterval(resendCountdownTimer);
+  }
+}
+
+function startResendCountdown(email) {
+  clearInterval(resendCountdownTimer);
+  tickResendButton(email);
+  resendCountdownTimer = setInterval(() => tickResendButton(email), 1000);
+}
+
+let verifyEmailCurrentEmail = "";
+
+// mode: "signup" (just registered) or "unconfirmed" (tried to login, blocked)
+function openVerifyEmailModal(email, mode) {
+  verifyEmailCurrentEmail = email;
+
+  document.getElementById("verify-email-title").textContent =
+    mode === "unconfirmed" ? "Email not confirmed yet" : "Confirm your email";
+  document.getElementById("verify-email-status").innerHTML =
+    mode === "unconfirmed"
+      ? `Your account exists, but <strong>${email}</strong> hasn't been confirmed yet. Check your inbox for the link, or resend it below.`
+      : `We sent a confirmation link to <strong>${email}</strong>. Click it to activate your account, then come back and login.`;
+
+  document.getElementById("verify-email-modal").classList.add("active");
+  startResendCountdown(email);
+}
+
+function closeVerifyEmailModal() {
+  document.getElementById("verify-email-modal").classList.remove("active");
+  clearInterval(resendCountdownTimer);
+}
+
+document.getElementById("verify-email-close").addEventListener("click", closeVerifyEmailModal);
+
+document.getElementById("verify-email-resend").addEventListener("click", () => {
+  if (verifyEmailCurrentEmail) resendConfirmationEmail(verifyEmailCurrentEmail);
+});
+
+async function resendConfirmationEmail(email) {
+  const waitSecs = getResendCooldownRemaining(email);
+  if (waitSecs > 0) return; // button is disabled in this state anyway, this is just a safety net
+
+  const { error } = await supabase.auth.resend({ type: "signup", email });
+
+  if (error) {
+    // Supabase's own rate limit may still catch us right at the edge of the
+    // client-side window — surface that clearly instead of a generic failure.
+    document.getElementById("verify-email-status").innerHTML =
+      `<span style="color:#DC2626">Couldn't resend: ${error.message}</span>`;
+    return;
+  }
+
+  markResendSent(email);
+  startResendCountdown(email);
+}
+
+
 
 document.getElementById("register-btn").addEventListener("click", async () => {
   const name = document.getElementById("reg-name").value.trim();
@@ -150,10 +240,38 @@ document.getElementById("register-btn").addEventListener("click", async () => {
     return;
   }
 
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { name } }, // stashed on the auth user so we still have it even before email is confirmed
+  });
 
   if (error) {
     alert(error.message);
+    return;
+  }
+
+  document.getElementById("reg-name").value = "";
+  document.getElementById("reg-email").value = "";
+  document.getElementById("reg-password").value = "";
+
+  // If Supabase's "Confirm email" setting is ON, signUp() succeeds but returns
+  // no session yet — the account exists but isn't usable until they click the
+  // link in their inbox. If it's OFF, a session comes back immediately and we
+  // can set the profile up right away like before.
+  if (!data.session) {
+    markResendSent(email); // Supabase just sent the first one — start the cooldown clock
+
+    if (window.emieReact) {
+      window.emieReact(
+        "assets/gifs/kilig_emie.gif",
+        `Almost there! Check ${email} for a confirmation link.`,
+        3000
+      );
+    }
+
+    document.querySelector('.account-tab[data-tab="login"]').click();
+    openVerifyEmailModal(email, "signup");
     return;
   }
 
@@ -175,11 +293,6 @@ document.getElementById("register-btn").addEventListener("click", async () => {
   }
 
   alert("Account created! Please login.");
-
-  document.getElementById("reg-name").value = "";
-  document.getElementById("reg-email").value = "";
-  document.getElementById("reg-password").value = "";
-
   document.querySelector('.account-tab[data-tab="login"]').click();
 });
 
@@ -199,6 +312,15 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    const notConfirmed =
+      error.code === "email_not_confirmed" ||
+      error.message?.toLowerCase().includes("email not confirmed");
+
+    if (notConfirmed) {
+      openVerifyEmailModal(email, "unconfirmed");
+      return;
+    }
+
     alert("Invalid email or password.");
 
     if (window.emieReact) {
@@ -219,7 +341,9 @@ document.getElementById("login-btn").addEventListener("click", async () => {
   }
 
   if (!profile) {
-    const fallbackName = data.user.email ? data.user.email.split("@")[0] : "ClassCart User";
+    const fallbackName =
+      data.user.user_metadata?.name ||
+      (data.user.email ? data.user.email.split("@")[0] : "ClassCart User");
     const { data: created, error: insertError } = await supabase
       .from("profile")
       .insert({ id: data.user.id, name: fallbackName, is_admin: false })

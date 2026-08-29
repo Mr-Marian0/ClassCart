@@ -962,6 +962,16 @@ body {
   background: #f5cc28;
 }
 
+.btn-primary-sm:disabled {
+  background: var(--cc-border);
+  color: var(--cc-slate);
+  cursor: not-allowed;
+}
+
+.btn-primary-sm:disabled:hover {
+  background: var(--cc-border);
+}
+
 .btn-danger {
   background: #DC2626;
   color: var(--cc-white);
