@@ -448,14 +448,18 @@ async function renderOrders() {
   }
 
   cachedOrders = orders || [];
-  countBadge.textContent = cachedOrders.length;
 
   const filtered = cachedOrders.filter((o) => {
+    if (currentOrderFilter === "archived") return o.is_archived;
+    if (o.is_archived) return false; // archived orders stay out of every other tab
+
     if (currentOrderFilter === "all") return true;
     if (currentOrderFilter === "cancelled") return o.status === "Cancelled";
     if (currentOrderFilter === "not-shipped") return o.status !== "Cancelled" && o.status !== "Delivered";
     return true;
   });
+
+  countBadge.textContent = filtered.length;
 
   list.innerHTML = "";
 
@@ -469,6 +473,7 @@ async function renderOrders() {
   filtered.forEach((order) => {
     const meta = statusMeta(order.status);
     const canCancel = order.status !== "Cancelled" && order.status !== "Delivered";
+    const canArchive = order.status === "Cancelled" || order.status === "Delivered";
     const placedDate = new Date(order.created_at).toLocaleDateString();
 
     const card = document.createElement("div");
@@ -510,6 +515,14 @@ async function renderOrders() {
 
       <div class="order-status-row">
         <span class="order-status-badge ${meta.cls}">${meta.label}</span>
+        <div class="order-actions">
+          ${canCancel ? `<button class="btn-outline cancel-order" data-order-id="${order.id}">Cancel Order</button>` : ""}
+          ${
+            canArchive
+              ? `<button class="btn-outline archive-order" data-order-id="${order.id}">${order.is_archived ? "Unarchive" : "Archive"}</button>`
+              : ""
+          }
+        </div>
       </div>
 
       ${
@@ -529,7 +542,6 @@ async function renderOrders() {
           </div>
           <div class="order-item-actions">
             <button class="btn-outline buy-again" data-order-id="${order.id}" data-item-id="${item.id}">Buy it again</button>
-            ${canCancel ? `<button class="btn-outline cancel-order" data-order-id="${order.id}">Cancel Order</button>` : ""}
           </div>
         </div>
       `
@@ -574,9 +586,10 @@ document.querySelectorAll(".orders-subtab").forEach((tab) => {
 });
 
 // Buy it again / Cancel Order (event delegation, since cards are rendered dynamically)
-document.getElementById("orders-list").addEventListener("click", (e) => {
+document.getElementById("orders-list").addEventListener("click", async (e) => {
   const buyBtn = e.target.closest(".buy-again");
   const cancelBtn = e.target.closest(".cancel-order");
+  const archiveBtn = e.target.closest(".archive-order");
 
   if (buyBtn) {
     const order = cachedOrders.find((o) => o.id == buyBtn.dataset.orderId);
@@ -611,6 +624,28 @@ document.getElementById("orders-list").addEventListener("click", (e) => {
     document.getElementById("cancel-reason-select").value = "";
     document.getElementById("cancel-reason-text").value = "";
     document.getElementById("cancel-order-modal").classList.add("active");
+  }
+
+  if (archiveBtn) {
+    const order = cachedOrders.find((o) => o.id == archiveBtn.dataset.orderId);
+    if (!order) return;
+
+    const nextState = !order.is_archived;
+    archiveBtn.disabled = true;
+
+    const { error } = await supabase
+      .from("orders")
+      .update({ is_archived: nextState })
+      .eq("id", order.id);
+
+    if (error) {
+      console.error("Archive toggle failed:", error);
+      alert("Couldn't update this order: " + error.message);
+      archiveBtn.disabled = false;
+      return;
+    }
+
+    renderOrders();
   }
 });
 
